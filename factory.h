@@ -1,11 +1,11 @@
 //
 // Created by orw on 3/14/23.
 //
-#pragma once
-#include <vector>
-
 #ifndef HUAWEI_FACTORY_H
 #define HUAWEI_FACTORY_H
+
+#pragma once
+#include <vector>
 
 enum FactoryFlag{
     Ready = 0,
@@ -28,15 +28,21 @@ enum FactoryType{
 
 class Factory{
 private:
-    FactoryType type_;
-    FactoryFlag flag_;
-    std::vector<float> coordinate_;
-    int remainingProducingTime_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
-    std::vector<int> warehouseStatus_; //仓库格状态
+    FactoryType factoryType_;
+    FactoryFlag factoryFlag_;
+    float coordinate_[2];
+    int remainingTime_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
+    int warehouseState_; //仓库格状态
     int productState_; //产品格状态
 public:
     Factory();
-    bool setType(int type);
+    Factory(FactoryType factoryType, float x_initial, float y_initial);;
+    float* GetCoordinate();
+    bool SetType(FactoryType type);
+    bool SetRemainingTime(int time);
+    bool SetWarehouseStatus(int state);
+    bool SetProductStatus(int state);
+
 
 };
 

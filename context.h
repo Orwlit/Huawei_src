@@ -3,6 +3,7 @@
 //
 #ifndef CODECRAFTSDK_CONTEXT_H
 #define CODECRAFTSDK_CONTEXT_H
+
 #pragma once
 #include <map>
 #include <vector>
@@ -27,10 +28,10 @@ public:
 class Context{
 public:
     Context();
-    bool Initialize(std::vector<Robot*> robots,
-                    std::map<FactoryType, std::vector<Factory*>> factories);
+    bool Initialize();
     bool UpdateAllStatus(std::vector<Robot*> robots,
                          std::map<FactoryType, std::vector<Factory*>> factories);
+    bool run();
 
 private:
     std::vector<Robot*> robots;
@@ -50,6 +51,7 @@ private:
 
     std::string OK_;
     bool SYSTEM_ENABLE_;
+    float MINIMUM_EQUAL_VALUE;
 };
 
 #endif //CODECRAFTSDK_CONTEXT_H

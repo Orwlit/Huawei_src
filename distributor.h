@@ -4,6 +4,7 @@
 
 #ifndef HUAWEI_DISTRIBUTOR_H
 #define HUAWEI_DISTRIBUTOR_H
+#pragma once
 
 
 enum DistributorFlag{
