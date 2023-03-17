@@ -27,6 +27,8 @@ private:
 
 
     int frameID_;
+    int previousFrameID;
+    int MAX_HZ;
     int currentMoney_;
     int factoryTotalNum_;
     int robotTotalNum_;

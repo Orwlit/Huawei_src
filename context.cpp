@@ -11,9 +11,12 @@
 
 Context::Context() {
     this->OK_ = "OK";
-    robotTotalNum_ = 4;
-    MINIMUM_EQUAL_VALUE = 0.01;
+    this->robotTotalNum_ = 4;
+    this->MINIMUM_EQUAL_VALUE = 0.001f;
+    this->MAX_HZ = 50;
 
+    this->frameID_ = 0;
+    this->previousFrameID = 0;
     if(!(this->Initialize())){
         std::cerr << "Initialization Failed" << std::endl;
     }
@@ -116,9 +119,8 @@ bool Context::UpdateAllStatus() {
     float robot_x_input, robot_y_input; //坐标
 
     //读取对应的机器人信息
-    for (int i = 0; i < this->robotTotalNum_; ++i) {
+    for (int robot_index = 0; robot_index < this->robotTotalNum_; ++robot_index) {
         std::cin >> nearbyFactoryID_cahce;
-//        std::cerr << nearbyFactoryID_cahce << std::endl;
         if (std::cin.bad()) {
             std::cerr << "ROBOT nearbyFactoryID READ FAILED!!!" << std::endl;
             std::cerr << "nearbyFactoryID: " << nearbyFactoryID_cahce << std::endl;
@@ -126,7 +128,6 @@ bool Context::UpdateAllStatus() {
         }
 
         std::cin >> carryingType_cahce;
-//        std::cerr << carryingType_cahce << std::endl;
         if (std::cin.bad()) {
             std::cerr << "ROBOT carryingType READ FAILED!!!" << std::endl;
             std::cerr << "carryingType: " << carryingType_cahce << std::endl;
@@ -134,56 +135,51 @@ bool Context::UpdateAllStatus() {
         }
 
         std::cin >> timePunishment_cahce >> crashPunishment_cahce;
-//        std::cerr << timePunishment_cahce << "\t" << crashPunishment_cahce << std::endl;
         if (std::cin.bad()) {
             std::cerr << "ROBOT Punishment READ FAILED!!!" << std::endl;
             return false;
         }
 
         std::cin >> angularVelocity_cahce >> linearVelocity_x_cahce >> linearVelocity_y_cahce;
-//        std::cerr << angularVelocity_cahce << "\t" << linearVelocity_x_cahce << "\t" << linearVelocity_y_cahce << std::endl;
         if (std::cin.bad()) {
             std::cerr << "ROBOT Velocity READ FAILED!!!" << std::endl;
             return false;
         }
 
         std::cin >> orientation_cahce >> robot_x_input >> robot_y_input;
-//        std::cerr << orientation_cahce << "\t" << robot_x_input << "\t" << robot_y_input << std::endl;
         if (std::cin.bad()) {
             std::cerr << "ROBOT Pose READ FAILED!!!" << std::endl;
             return false;
         }
 
         //更新对应的机器人信息
-        for (int robot_index = 0; robot_index < this->robotTotalNum_; ++robot_index) {
-            if (!(this->robots_[robot_index]->SetNearbyFactoryID(nearbyFactoryID_cahce))) {
-                std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
-                          << " SetNearbyFactoryID FAILED!!!" << std::endl;
-            }
-            if (!(this->robots_[robot_index]->SetCarryingType(carryingType_cahce))) {
-                std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
-                          << " SetCarryingType FAILED!!!" << std::endl;
-            }
-            if (!(this->robots_[robot_index]->SetPunishments(timePunishment_cahce, crashPunishment_cahce))) {
-                std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
-                          << " SetPunishments FAILED!!!" << std::endl;
-            }
-            if (!(this->robots_[robot_index]->SetAngularVelocity(angularVelocity_cahce))) {
-                std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
-                          << " SetAngularVelocity FAILED!!!" << std::endl;
-            }
-            if (!(this->robots_[robot_index]->SetLinearVelocity(linearVelocity_x_cahce, linearVelocity_y_cahce))) {
-                std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
-                          << " SetLinearVelocity FAILED!!!" << std::endl;
-            }
-            if (!(this->robots_[robot_index]->SetOrientation(orientation_cahce))) {
-                std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
-                          << " SetOrientation FAILED!!!" << std::endl;
-            }
-            if (!(this->robots_[robot_index]->SetCoordinate(robot_x_input, robot_y_input))) {
-                std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
-                          << " SetCoordinate FAILED!!!" << std::endl;
-            }
+        if (!(this->robots_[robot_index]->SetNearbyFactoryID(nearbyFactoryID_cahce))) {
+            std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
+                      << " SetNearbyFactoryID FAILED!!!\t";
+        }
+        if (!(this->robots_[robot_index]->SetCarryingType(carryingType_cahce))) {
+            std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
+                      << " SetCarryingType FAILED!!!\t";
+        }
+        if (!(this->robots_[robot_index]->SetPunishments(timePunishment_cahce, crashPunishment_cahce))) {
+            std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
+                      << " SetPunishments FAILED!!!\t";
+        }
+        if (!(this->robots_[robot_index]->SetAngularVelocity(angularVelocity_cahce))) {
+            std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
+                      << " SetAngularVelocity FAILED!!!\t";
+        }
+        if (!(this->robots_[robot_index]->SetLinearVelocity(linearVelocity_x_cahce, linearVelocity_y_cahce))) {
+            std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
+                      << " SetLinearVelocity FAILED!!!\t";
+        }
+        if (!(this->robots_[robot_index]->SetOrientation(orientation_cahce))) {
+            std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
+                      << " SetOrientation FAILED!!!\t";
+        }
+        if (!(this->robots_[robot_index]->SetCoordinate(robot_x_input, robot_y_input))) {
+            std::cerr << "ROBOT NO." << this->robots_[robot_index]->GetRobotID()
+                      << " SetCoordinate FAILED!!!\t";
         }
     }
 
@@ -192,8 +188,10 @@ bool Context::UpdateAllStatus() {
     if (!(std::cin >> ok_get) || ok_get != this->OK_) {
         std::cerr << "UpdateAllStatus NOT OK!!!" << std::endl;
         std::cerr << "ok_get: " << ok_get << "\tthis->OK_: " << this->OK_ << std::endl;
+
         return false;
     }
+
     return true;
 }
 
@@ -240,14 +238,18 @@ bool Context::Initialize() {
 }
 
 bool Context::run() {
-    double a = 0.0;
     while (Context::UpdateAllStatus()){
+
+        float dt = (static_cast<float>(this->frameID_ - this->previousFrameID)) * (1.0f / static_cast<float>(this->MAX_HZ));
+        if (dt == 0){
+            std::cerr << "dt = 0!!!, frameID_: " << this->frameID_ << ", previousFrameID: " << this->previousFrameID << std::endl;
+        }
         std::cout << this->frameID_ << std::endl;
-        std::cout << "forward 0 " << a << std::endl;
+        robots_[0]->HighSpeedMove(2.0f, 2.0f, dt);
         std::cout << "OK" << std::flush;
 
-        a += 0.1;
-    }
+        this->previousFrameID = this->frameID_;
 
+    }
     return false;
 }
