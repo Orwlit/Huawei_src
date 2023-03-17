@@ -34,7 +34,7 @@ private:
     float timePunishment_; //携带物品时为[0.8, 1]的浮点数，不携带物品时为0
     float crashPunishment_; //携带物品时为[0.8, 1]的浮点数，不携带物品时为0
     float angularVelocity_; //角速度
-    float linearVelocity_; //线速度
+    float linearVelocity_x_, linearVelocity_y_; //线速度 x, y
     float orientation_; //朝向
     float coordinate_[2]; //坐标
 public:
@@ -45,7 +45,7 @@ public:
     bool SetCarryingType(int carryingType);
     bool SetPunishments(float timePunishment, float crashPunishment);
     bool SetAngularVelocity(float angularVelocity);
-    bool SetLinearVelocity(float linearVelocity);
+    bool SetLinearVelocity(float linearVelocity_x, float linearVelocity_y);
     bool SetOrientation(float orientation);
     bool SetCoordinate(float x, float y);
 

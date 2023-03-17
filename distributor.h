@@ -8,11 +8,19 @@
 
 
 enum DistributorFlag{
-    RARE = 0, //有9时才行，123优先
-    MEDIUM_RARE = 1,
-    MEDIUM = 2, //456优先
-    MEDIUM_WELL = 3,
-    WELL_DONE = 4 //7优先
+    AIMLESS = 0,
+    TRICK = 1,
+    ELITE_456 = 2,
+    GLOBAL_456 = 3
+};
+
+enum Priority{
+    ANYWAY = 0,
+    ONE = 1,
+    TWO = 2,
+    THREE = 3,
+    FOUR = 4,
+    FIVE = 5
 };
 
 class Distributor{

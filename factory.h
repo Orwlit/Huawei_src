@@ -28,18 +28,26 @@ enum FactoryType{
 
 class Factory{
 private:
+    int factoryID_;
     FactoryType factoryType_;
     FactoryFlag factoryFlag_;
     float coordinate_[2];
-    int remainingTime_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
+    int remainingFrame_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
     int warehouseState_; //仓库格状态
     int productState_; //产品格状态
+
+    int MAX_REMAINING_FRAME;
 public:
     Factory();
-    Factory(FactoryType factoryType, float x_initial, float y_initial);;
+    Factory(int factoryID, FactoryType factoryType, float x_initial, float y_initial);;
+
     float* GetCoordinate();
+    FactoryFlag GetFlag();
+    FactoryType GetType();
+
     bool SetType(FactoryType type);
-    bool SetRemainingTime(int time);
+    bool SetFlag(FactoryFlag flag);
+    bool SetRemainingFrame(int time);
     bool SetWarehouseStatus(int state);
     bool SetProductStatus(int state);
 

@@ -19,8 +19,8 @@ Robot::Robot(int robotID, float x_initial, float y_initial) {
 
     this->MAX_LINEAR_VELOCITY = 6.0;
     this->MIN_LINEAR_VELOCITY = -2.0;
-    this->MAX_ANGULAR_VELOCITY = M_PI;
-    this->MIN_ANGULAR_VELOCITY = -M_PI;
+    this->MAX_ANGULAR_VELOCITY = M_PI + 0.1f;
+    this->MIN_ANGULAR_VELOCITY = -M_PI - 0.1f;
 }
 
 void Robot::Forward(float speed) const {
@@ -75,6 +75,8 @@ bool Robot::SetPunishments(float timePunishment, float crashPunishment) {
 bool Robot::SetAngularVelocity(float angularVelocity) {
     if (angularVelocity > this->MAX_ANGULAR_VELOCITY || angularVelocity < this->MIN_ANGULAR_VELOCITY){
         std::cerr << "Robot AngularVelocity OUT OF RANGE!!!" << std::endl;
+        std::cerr << "AngularVelocity: " << angularVelocity
+                  << "should in (" << this->MAX_ANGULAR_VELOCITY << ", " << this->MIN_ANGULAR_VELOCITY << ")" << std::endl;
         return false;
     }
     else{
@@ -83,13 +85,23 @@ bool Robot::SetAngularVelocity(float angularVelocity) {
     }
 }
 
-bool Robot::SetLinearVelocity(float linearVelocity) {
-    if (linearVelocity > this->MAX_LINEAR_VELOCITY || linearVelocity < this->MIN_LINEAR_VELOCITY){
-        std::cerr << "Robot LinearVelocity OUT OF RANGE!!!" << std::endl;
+bool Robot::SetLinearVelocity(float linearVelocity_x, float linearVelocity_y) {
+    if (linearVelocity_x > this->MAX_LINEAR_VELOCITY || linearVelocity_x < this->MIN_LINEAR_VELOCITY){
+        std::cerr << "Robot " << this->robotID_ << " LinearVelocity_x OUT OF RANGE!!!" << std::endl;
+        return false;
+    }
+    if (linearVelocity_y > this->MAX_LINEAR_VELOCITY || linearVelocity_y < this->MIN_LINEAR_VELOCITY){
+        std::cerr << "Robot " << this->robotID_ << " LinearVelocity_y OUT OF RANGE!!!" << std::endl;
+        return false;
+    }
+    double linear_velocity = sqrt(pow(linearVelocity_x, 2) + pow(linearVelocity_y, 2));
+    if (linear_velocity > this->MAX_LINEAR_VELOCITY || linear_velocity < this->MIN_LINEAR_VELOCITY){
+        std::cerr << "Robot " << this->robotID_ << " linear_velocity OUT OF RANGE!!!" << std::endl;
         return false;
     }
     else{
-        this->linearVelocity_ = linearVelocity;
+        this->linearVelocity_x_ = linearVelocity_x;
+        this->linearVelocity_y_ = linearVelocity_y;
         return true;
     }
 }

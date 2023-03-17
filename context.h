@@ -7,47 +7,29 @@
 #pragma once
 #include <map>
 #include <vector>
-#include <mutex>
+#include <memory>
 
 #include "robot.h"
 #include "factory.h"
-
-//用作更新机器人和工厂的信息，单例模式
-class Subscriber{
-private:
-
-
-public:
-
-
-
-
-};
-
 
 class Context{
 public:
     Context();
     bool Initialize();
-    bool UpdateAllStatus(std::vector<Robot*> robots,
-                         std::map<FactoryType, std::vector<Factory*>> factories);
+    bool UpdateAllStatus();
     bool run();
 
 private:
-    std::vector<Robot*> robots;
-    std::map<FactoryType, std::vector<Factory*>> factories;
+    std::vector<std::shared_ptr<Robot>> robots_;
+    std::map<int, std::shared_ptr<Factory>> allFactories_;
 
-    std::map<int, std::pair<int, int>> factory_coordinate;
+//    std::map<int, float*> factory_coordinate_;
 
-    static std::mutex mtx; // 互斥锁
 
     int frameID_;
     int currentMoney_;
     int factoryTotalNum_;
     int robotTotalNum_;
-
-    std::vector<int> producing_time; //?
-
 
     std::string OK_;
     bool SYSTEM_ENABLE_;
