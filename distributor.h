@@ -6,6 +6,9 @@
 #define HUAWEI_DISTRIBUTOR_H
 #pragma once
 
+#include "context.h"
+#include "robot.h"
+#include "factory.h"
 
 enum DistributorFlag{
     AIMLESS = 0,
@@ -27,9 +30,38 @@ class Distributor{
 public:
     Distributor();
 
+    //Basic Function
+    bool MaintainGraph(); //从context中维护图结构
+    void FloydMinDistance() const;
+
+    //Strategies
+    bool StrategyAimless();
+    bool StrategyTrick();
+    bool StrategyElite();
+    bool StrategyGlobal();
+
+    //全局图优化，利用A层到D层最短距离，结合机器人距离派发任务。(A层：123；B层：456；C层：7；D层：89)
+    bool GraphOptimization();
+
+    //Strategy conversion
+    void Distribute();
+
+
+    //Calculate Flag
+    bool CalculateFlag();
+
+    //Tasks
+    bool BuyTask();
+    bool SellTask();
+
+    bool SetPriority();
+
+    bool run();
 private:
+    std::shared_ptr<Context> context;
 
-
+    double DISCONNECT = 0;
+    double INFINITE = 999.0;
 
 };
 #endif //HUAWEI_DISTRIBUTOR_H

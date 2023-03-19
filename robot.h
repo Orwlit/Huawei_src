@@ -1,11 +1,12 @@
 //
 // Created by orw on 3/14/23.
 //
-#pragma once
-#include <vector>
-
 #ifndef HUAWEI_ROBOT_H
 #define HUAWEI_ROBOT_H
+
+#include <vector>
+
+//#include "distributor.h"
 
 enum RobotFlag{
     ROBOT_READY = 0,
@@ -14,8 +15,12 @@ enum RobotFlag{
 
 class Robot{
 private:
+
+
     int robotID_;
     RobotFlag flag;
+//    Priority priority;
+
     float MAX_LINEAR_VELOCITY;
     float MAX_ANGULAR_VELOCITY;
     float MIN_LINEAR_VELOCITY;
@@ -32,16 +37,18 @@ private:
     float orientation_; //朝向
     float coordinate_[2]; //坐标
 
-    void Forward(float speed) const;
-    void Rotate(float speed) const;
 
 public:
     Robot();
     Robot(int robotID, float x_initial, float y_initial);
 
+    void Forward(float speed) const;
+    void Rotate(float speed) const;
+    void RotateAngular(float angular, float dt) const;
+
     void TrickLoop(); //偷鸡策略，围着19绕圈
     void HighSpeedMove(float destination_x, float destination_y, float d_time); //高速模式
-    void LowSpeedMove();
+    void LowSpeedMove(float destination_x, float destination_y, float dt);
 
     //Setter
     bool SetNearbyFactoryID(int nearbyFactory);
@@ -54,12 +61,19 @@ public:
 
     //Getter
     [[nodiscard]] int GetRobotID() const ;
+    [[nodiscard]] RobotFlag GetFlag() const;
+    [[nodiscard]] int GetNearbyFactoryId() const;
+    [[nodiscard]] int GetCarryingType() const;
+    [[nodiscard]] float GetAngularVelocity() const;
+    [[nodiscard]] float GetLinearVelocity() const;
+    [[nodiscard]] float GetOrientation() const;
+    [[nodiscard]] const float *GetCoordinate() const;
 
     //Interact
     [[nodiscard]] bool Buy(int factoryID) const;
     [[nodiscard]] bool Sell(int factoryID) const;
     [[nodiscard]] bool Destroy() const;
-    bool Reachable(float destination_x, float destination_y) const;
+    [[nodiscard]] bool Reachable(float destination_x, float destination_y) const;
 
 };
 

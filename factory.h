@@ -4,14 +4,8 @@
 #ifndef HUAWEI_FACTORY_H
 #define HUAWEI_FACTORY_H
 
-#pragma once
 #include <vector>
 
-enum FactoryFlag{
-    Ready = 0,
-    Producing = 1,
-    Vacant = 2
-};
 
 enum FactoryType{
     UNKNOWN = 0, //一开始均设为UNKNOWN
@@ -26,8 +20,15 @@ enum FactoryType{
     SELLER_9 = 9
 };
 
+enum FactoryFlag{
+    READY = 0,
+    PRODUCING = 1,
+    VACANT = 2
+};
+
 class Factory{
 private:
+
     int factoryID_;
     FactoryType factoryType_;
     FactoryFlag factoryFlag_;
@@ -41,9 +42,14 @@ public:
     Factory();
     Factory(int factoryID, FactoryType factoryType, float x_initial, float y_initial);;
 
-    float* GetCoordinate();
-    FactoryFlag GetFlag();
-    FactoryType GetType();
+    //Getter
+    [[nodiscard]] FactoryFlag GetFactoryFlag();
+    [[nodiscard]] FactoryType GetFactoryType();
+    [[nodiscard]] const float* GetCoordinate() const;
+    [[nodiscard]] int GetFactoryId() const;
+    [[nodiscard]] int GetRemainingFrame() const;
+    [[nodiscard]] int GetWarehouseState() const;
+    [[nodiscard]] int GetProductState() const;
 
     bool SetType(FactoryType type);
     bool SetFlag(FactoryFlag flag);

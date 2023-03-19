@@ -25,15 +25,15 @@ bool Factory::SetFlag(FactoryFlag flag) {
     return false;
 }
 
-float* Factory::GetCoordinate() {
+const float* Factory::GetCoordinate() const {
     return this->coordinate_;
 }
 
-FactoryFlag Factory::GetFlag() {
+FactoryFlag Factory::GetFactoryFlag() {
     return this->factoryFlag_;
 }
 
-FactoryType Factory::GetType() {
+FactoryType Factory::GetFactoryType() {
     return this->factoryType_;
 }
 
@@ -74,6 +74,22 @@ Factory::Factory(int factoryID, FactoryType factoryType, float x_initial, float 
     this->coordinate_[1] = y_initial;
 
     this->MAX_REMAINING_FRAME = 1000; //7号的时间为1000帧
+}
+
+int Factory::GetFactoryId() const {
+    return factoryID_;
+}
+
+int Factory::GetRemainingFrame() const {
+    return remainingFrame_;
+}
+
+int Factory::GetWarehouseState() const {
+    return warehouseState_;
+}
+
+int Factory::GetProductState() const {
+    return productState_;
 }
 
 
