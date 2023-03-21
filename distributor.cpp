@@ -41,10 +41,10 @@ bool Distributor::run() {
 //        }
 
         std::cerr << "Frame ID: " << this->context->GetFrameId() << std::endl;
-        bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(3), 22);
+        bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(3), 20);
         if (aboutToCrash){
-            this->context->GetRobot(0)->Rotate(M_PI/2);
-            this->context->GetRobot(3)->Rotate(M_PI/2);
+            this->context->GetRobot(0)->Rotate(M_PI);
+            this->context->GetRobot(3)->Rotate(M_PI);
         }else {
             this->context->GetRobot(0)->HighSpeedMove(50.0f, 20.0f, this->context->GetDt());
             this->context->GetRobot(3)->HighSpeedMove(0.0f, 20.0f, this->context->GetDt());

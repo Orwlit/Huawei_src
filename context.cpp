@@ -410,14 +410,21 @@ Context::AboutToCrash(std::shared_ptr<Robot> robot1, std::shared_ptr<Robot> robo
     float orientation1 = robot1->GetOrientation();
     float orientation2 = robot2->GetOrientation();
 
-//    float robot1_dt_vector_x = robot1_dt_velocity * cos(orientation1);
-//    float robot1_dt_vector_y = robot1_dt_velocity * sin(orientation1);
-//    float robot2_dt_vector_x = robot2_dt_velocity * cos(orientation2);
-//    float robot2_dt_vector_y = robot2_dt_velocity * sin(orientation2);
+    float robot1_x = robot1->GetCoordinate()[0];
+    float robot1_y = robot1->GetCoordinate()[1];
+    float robot2_x = robot2->GetCoordinate()[0];
+    float robot2_y = robot2->GetCoordinate()[1];
 
-    float vector_x_between = robot2->GetCoordinate()[0] - robot1->GetCoordinate()[0];
-    float vector_y_between = robot2->GetCoordinate()[1] - robot1->GetCoordinate()[1];
+    float vector_x_between = robot2_x - robot1_x;
+    float vector_y_between = robot2_y - robot1_y;
     float distance_between = sqrt(pow(vector_x_between, 2) + pow(vector_y_between, 2));
+
+    float robot1_head_x = robot1->GetLinearVelocityX() * k * dt + robot1_x;
+    float robot1_head_y = robot1->GetLinearVelocityY() * k * dt + robot1_y;
+    float robot2_head_x = robot2->GetLinearVelocityX() * k * dt + robot2_x;
+    float robot2_head_y = robot2->GetLinearVelocityY() * k * dt + robot2_y;
+    float distance_head = sqrt(pow(robot2_head_x - robot1_head_x, 2) + pow(robot2_head_y - robot1_head_y, 2));
+
 
 //    bool vector_condition_r1_plus_r2 = ((robot1_dt_vector_x + robot2_dt_vector_x) == vector_x_between) &&
 //            ((robot1_dt_vector_y + robot2_dt_vector_y) == vector_y_between);
@@ -446,6 +453,20 @@ Context::AboutToCrash(std::shared_ptr<Robot> robot1, std::shared_ptr<Robot> robo
     }
 //    std::cerr << "triangle_condition passed!!!" << std::endl;
 
+//    std::cerr << "d_tail - d_head: " << distance_between - distance_head << std::endl;
+//    if (distance_between < distance_head){
+//        return false;
+//    }
+    float condition = distance_between - distance_head;
+    if (distance_between > distance_head){
+
+        std::cerr << "CRASH WARNING!!!" << std::endl;
+        return true;
+    }
+
+    return false;
+
+
     // 将1和2间的距离作为新坐标轴正方向，根据行进方向判断是否相撞
     float theta_distance = std::atan2(vector_y_between, vector_x_between);
     float orientation1_new = orientation1 - theta_distance;
@@ -466,7 +487,7 @@ Context::AboutToCrash(std::shared_ptr<Robot> robot1, std::shared_ptr<Robot> robo
         right_angle = orientation1_new;
 //        std::cerr << "LEFT is " << robot1->GetRobotID() << "\tRIGHT is " << robot2->GetRobotID() << std::endl;
     }
-    std::cerr << "LEFT_angle: " << 180 * left_angle / M_PI << ", RIGHT_angle: " << 180 * right_angle / M_PI << std::endl;
+//    std::cerr << "LEFT_angle: " << 180 * left_angle / M_PI << ", RIGHT_angle: " << 180 * right_angle / M_PI << std::endl;
 
     // 根据象限判断是否有相撞的可能。左1象限右2象限 或 左4象限右3象限
     bool left1 = left_angle >= 0 && left_angle <= M_PI / 2;

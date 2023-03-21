@@ -309,4 +309,12 @@ void Robot::RotateAngular(float angular, float dt) const {
     }
 }
 
+float Robot::GetLinearVelocityX() const {
+    return linearVelocity_x_;
+}
+
+float Robot::GetLinearVelocityY() const {
+    return linearVelocity_y_;
+}
+
 

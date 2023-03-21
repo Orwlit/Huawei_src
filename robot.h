@@ -68,6 +68,8 @@ public:
     [[nodiscard]] float GetLinearVelocity() const;
     [[nodiscard]] float GetOrientation() const;
     [[nodiscard]] const float *GetCoordinate() const;
+    [[nodiscard]] float GetLinearVelocityX() const;
+    [[nodiscard]] float GetLinearVelocityY() const;
 
     //Interact
     [[nodiscard]] bool Buy(int factoryID) const;
