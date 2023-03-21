@@ -639,12 +639,62 @@ void Context::FactoriesClassification() {
     }
 }
 
+inline std::vector<int> get_the_one_position(int num)
+{
+    std::vector<int> positions; //用来记录所有1所在的位置
+    int pos = 0; //记录1所在的位置
+    while(num) {
+        if(num & 1) {
+            positions.push_back(pos); //如果当前位置为1，就记录下来
+        }
+        num >>= 1; //将num右移一位
+        pos++; //位置加1
+    }
+    return positions;
+}
+
 std::map<FactoryType, bool> Context::WarehouseStateConversion(FactoryType type, int rawInfo){
     //TODO: 给一个原始仓库信息，返回一个std::map<FactoryType, bool> warehouseState
     std::map<FactoryType, bool> warehouseState;
-    //kjhkhlhj
-    //johlkhlkh
-    //kgjklhlhuj
+    std::vector<int> onePositions = get_the_one_position(rawInfo);
+    std::map<FactoryType, bool> res_;
+    if (type == FACTORY_4) 
+    {
+        res_.at(MATERIAL_1) = false;
+        res_.at(MATERIAL_2) = false;
+        for(auto pos : onePositions)
+        {
+            res_.at(static_cast<FactoryType>(pos)) = true;
+        }
+    }
+    else if (type == FACTORY_5) 
+    {
+        res_.at(MATERIAL_1) = false;
+        res_.at(MATERIAL_3) = false;
+        for(auto pos : onePositions)
+        {
+            res_.at(static_cast<FactoryType>(pos)) = true;
+        }
+    }
+    else if (type == FACTORY_6) 
+    {
+        res_.at(MATERIAL_2) = false;
+        res_.at(MATERIAL_3) = false;
+        for(auto pos : onePositions)
+        {
+            res_.at(static_cast<FactoryType>(pos)) = true;
+        }
+    }
+    else if (type == FACTORY_7)
+    {
+        res_.at(FACTORY_4) = false;
+        res_.at(FACTORY_5) = false;
+        res_.at(FACTORY_6) = false;
+        for(auto pos : onePositions)
+        {
+            res_.at(static_cast<FactoryType>(pos)) = true;
+        }
+    }
     return warehouseState;
 }
 
