@@ -48,7 +48,7 @@ public:
     void RFBroadcastUpdate(int robot_index, int factory_index);// 机器人广播更新，根据传入的机器人编号和工厂编号，对工厂是否有产品更新权值
 
     //Tasks
-    void DistributeTask(std::vector<int> route);
+    void DistributeTask(std::pair<double, std::vector<int>> route);
 
     // 查找工具
     [[nodiscard]] std::vector<int> FromIdTypeFindEdgeIndex(int factory_index, FactoryType to_factoryType) const;

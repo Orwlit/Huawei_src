@@ -128,8 +128,29 @@ std::vector<double> Distributor::BellmanFordDistance(std::vector<std::vector<int
     return route;
 }
 
-void Distributor::DistributeTask(std::vector<int> route) {
+void Distributor::DistributeTask(std::pair<double, std::vector<int>> route) {
     //TODO: 这个函数完成两个功能:
+    int robotID = route.second[0];  // 机器人ID
+    int thisBuyNode = route.second[1];  // 要去购买东西的节点ID
+    int thisSellNode = route.second[2]; // 要去卖东西的节点ID
+    FactoryType sellNodeType = this->context->GetFactory(thisSellNode)->GetFactoryType();
+    FactoryType buyNodeType = this->context->GetFactory(thisBuyNode)->GetFactoryType();
+    std::vector<int> all_buyNode_to_thisSellNode = this->context->GetGlobalFactoryTypeMap().at(this->context->GetFactory(thisSellNode)->GetFactoryType()).at(buyNodeType);
+
+    // 把所有要去买的材料类型的节点到卖材料节点的路径锁住
+    for(auto buyNodeID : all_buyNode_to_thisSellNode)
+    {
+        // this->globalGraph_[buyNodeID][thisSellNode] = this->INFINITE_;
+        // this->globalGraph_[thisSellNode][buyNodeID] = this->INFINITE_;
+        this->PreserveAndUpdateInfo(thisSellNode,buyNodeID, this->INFINITE_);
+    } 
+    // 把所有机器人到买材料的节点的路径锁住
+    for(auto i = 0; i < this->context->GetRobotTotalNum(); ++i)
+    {
+        // this->globalGraph_[i][thisBuyNode] = this->INFINITE_;
+        // this->globalGraph_[thisBuyNode][i] = this->INFINITE_;
+        this->PreserveAndUpdateInfo(i,thisBuyNode, this->INFINITE_);
+    }
     // 1. 根据机器人到卖家的最短路径route，分配一组买卖任务
     // 2. 分配任务后将相应路径的权值设为正无穷
 }
