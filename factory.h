@@ -5,7 +5,7 @@
 #define HUAWEI_FACTORY_H
 
 #include <vector>
-
+#include <map>
 
 enum FactoryType{
     UNKNOWN = 0, //一开始均设为UNKNOWN
@@ -20,6 +20,13 @@ enum FactoryType{
     SELLER_9 = 9
 };
 
+enum FactoryClass{
+    A = 1, //123
+    B = 2, //456
+    C = 3, //7
+    D = 4  //89
+};
+
 enum FactoryFlag{
     READY = 0,
     PRODUCING = 1,
@@ -28,13 +35,17 @@ enum FactoryFlag{
 
 class Factory{
 private:
+    std::map<int, int> warehouseMap;
 
     int factoryID_;
     FactoryType factoryType_;
+    FactoryClass factoryClass;
     FactoryFlag factoryFlag_;
+
     float coordinate_[2];
     int remainingFrame_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
     int warehouseState_; //仓库格状态
+//    std::vector<std::pair<int, int>> warehouseState_
     int productState_; //产品格状态
 
     int MAX_REMAINING_FRAME;
@@ -43,14 +54,16 @@ public:
     Factory(int factoryID, FactoryType factoryType, float x_initial, float y_initial);;
 
     //Getter
-    [[nodiscard]] FactoryFlag GetFactoryFlag();
-    [[nodiscard]] FactoryType GetFactoryType();
+    [[nodiscard]] FactoryFlag GetFactoryFlag() const;
+    [[nodiscard]] FactoryType GetFactoryType() const;
+    [[nodiscard]] FactoryClass GetFactoryClass() const;
     [[nodiscard]] const float* GetCoordinate() const;
     [[nodiscard]] int GetFactoryId() const;
     [[nodiscard]] int GetRemainingFrame() const;
     [[nodiscard]] int GetWarehouseState() const;
     [[nodiscard]] int GetProductState() const;
 
+    void SetFactoryClass(FactoryClass factoryClass);
     bool SetType(FactoryType type);
     bool SetFlag(FactoryFlag flag);
     bool SetRemainingFrame(int time);

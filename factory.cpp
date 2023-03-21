@@ -7,6 +7,27 @@
 
 Factory::Factory() {
     this->factoryType_ = FactoryType::UNKNOWN;
+
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[2] = 1;
+    this->warehouseMap[4] = 2;
+    this->warehouseMap[8] = 3;
+    this->warehouseMap[7] = 12;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
+    this->warehouseMap[0] = 0;
 }
 
 bool Factory::SetType(FactoryType type) {
@@ -29,11 +50,11 @@ const float* Factory::GetCoordinate() const {
     return this->coordinate_;
 }
 
-FactoryFlag Factory::GetFactoryFlag() {
+FactoryFlag Factory::GetFactoryFlag() const {
     return this->factoryFlag_;
 }
 
-FactoryType Factory::GetFactoryType() {
+FactoryType Factory::GetFactoryType() const {
     return this->factoryType_;
 }
 
@@ -53,6 +74,7 @@ bool Factory::SetWarehouseStatus(int state) {
                   << "\tSetWarehouseStatus OUT OF RANGE, should be 0 or 1: " << std::endl;
         return false;
     }
+
     this->warehouseState_ = state;
     return true;
 }
@@ -90,6 +112,14 @@ int Factory::GetWarehouseState() const {
 
 int Factory::GetProductState() const {
     return productState_;
+}
+
+FactoryClass Factory::GetFactoryClass() const {
+    return factoryClass;
+}
+
+void Factory::SetFactoryClass(FactoryClass factoryClass) {
+    Factory::factoryClass = factoryClass;
 }
 
 

@@ -11,10 +11,6 @@
 
 Context::Context() {
     this->dt = 0.0f;
-    this->OK_ = "OK";
-    this->robotTotalNum_ = 4;
-    this->MINIMUM_EQUAL_VALUE_ = 0.001f;
-    this->MAX_HZ = 50;
 
     this->currentMoney_ = 0;
     this->factoryTotalNum_ = 0;
@@ -22,13 +18,17 @@ Context::Context() {
     this->frameID_ = 0;
     this->previousFrameID_ = 0;
 
-    std::cout << "OK" << std::flush;
+
+
+
+//    std::cout << "OK" << std::flush;
     this->SYSTEM_ENABLE_ = true;
 
     if(!(this->Initialize())){
         std::cerr << "Initialization Failed" << std::endl;
     }
     std::cerr << "Initialization complete" << std::endl;
+    this->GenerateHistoryGraph();
 }
 
 bool Context::UpdateAllStatus() {
@@ -40,13 +40,22 @@ bool Context::UpdateAllStatus() {
         return false;
     }
 
+    if (this->frameID_ == 1){
+        this->FactoriesClassification();
+    }
+
 //    std::cerr << "frameID_: " << this->frameID_ << "\t" << "UpdateAllStatus start!!!" << std::endl;
 
-    std::cin >> this->factoryTotalNum_;
+    int factoryTotalNumCache = 0;
+    std::cin >> factoryTotalNumCache;
     if (std::cin.bad()) {
         std::cerr << "UPDATE FactoryTotalNum FAILED!!!" << std::endl;
         std::cerr << "factoryTotalNum_: " << factoryTotalNum_ << std::endl;
         return false;
+    }
+    if (factoryTotalNumCache != this->factoryTotalNum_){
+        std::cerr << "factoryTotalNum_ calculate ERROR in Context::initialize(), factoryTotalNum_ = " << this->factoryTotalNum_
+        << ", should be: " << factoryTotalNumCache << std::endl;
     }
 
     int factoryType_cache;
@@ -260,19 +269,14 @@ bool Context::Initialize() {
             float y = 50.0f - 0.25f - 0.5f * static_cast<float>(col);
 
             if (current_char == 'A'){
-                //TODO: 为什么emplace_back就不可以？？？
                 allRobots_.push_back(std::make_shared<Robot>(robotID, x, y));
-//                allRobots_.emplace_back(std::make_shared<Robot>(robotID, x, y));
                 ++robotID;
                 continue;
             }
             if (isdigit(current_char)){
                 int tmp = current_char - '0'; //直接static_cast会让current_char变为ASCII码，50
                 auto factoryType = static_cast<FactoryType>(tmp);
-                //TODO: 为什么emplace_back就不可以？？？
                 this->allFactories_.push_back(std::make_shared<Factory>(factoryID, factoryType, x, y));
-//                this->allFactories_.emplace_back(std::make_shared<Factory>(factoryID, factoryType, x, y));
-//                allFactories_[factoryID] = std::make_shared<Factory>(factoryID, factoryType, x, y);
 //                std::cerr << "factoryID: " << factoryID << " Created, x: " << x << " y: " << y << std::endl;
                 ++factoryID;
                 continue;
@@ -280,7 +284,7 @@ bool Context::Initialize() {
         }
     }
 
-
+    this->factoryTotalNum_ = factoryID;
 
     //读取OK，判断信息结束
     std::string ok_get;
@@ -289,6 +293,73 @@ bool Context::Initialize() {
         return false;
     }
     return true;
+}
+
+bool Context::GenerateHistoryGraph() {
+    // 初始全置为无穷大
+    std::vector<double> infinite_vector;
+    for (int i = 0; i < (this->factoryTotalNum_ + this->robotTotalNum_); ++i) {
+        for (int j = 0; j < (this->factoryTotalNum_ + this->robotTotalNum_); ++j) {
+            infinite_vector.push_back(this->INFINITE_);
+        }
+        initialHistoryGraph_.push_back(infinite_vector);
+    }
+
+    // 机器人到除了89的权值设为距离
+    for (int robot_index = 0; robot_index < this->robotTotalNum_; ++robot_index) {
+        for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
+            int factory_index_shift = factory_index + this->factoryIDShift_;
+            FactoryType currentType = this->GetFactory(factory_index)->GetFactoryType();
+            if ((currentType == SELLER_8) || (currentType == SELLER_9)){
+                continue;
+            } else{
+                double robot_x = this->GetRobot(robot_index)->GetCoordinate()[0];
+                double robot_y = this->GetRobot(robot_index)->GetCoordinate()[1];
+                double factory_x = this->GetFactory(factory_index)->GetCoordinate()[0];
+                double factory_y = this->GetFactory(factory_index)->GetCoordinate()[1];
+                double distance = sqrt(pow(factory_x - robot_x, 2) + pow(factory_y - robot_y, 2));
+
+                this->initialHistoryGraph_[robot_index][factory_index_shift] = distance;
+                this->initialHistoryGraph_[factory_index_shift][robot_index] = distance;
+            }
+        }
+    }
+
+    for (int factory_from_index = 0; factory_from_index < this->factoryTotalNum_; ++factory_from_index) {
+        double factory_from_x = this->GetFactory(factory_from_index)->GetCoordinate()[0];
+        double factory_from_y = this->GetFactory(factory_from_index)->GetCoordinate()[1];
+        FactoryClass factory_from_class = this->GetFactory(factory_from_index)->GetFactoryClass();
+        FactoryType factory_from_type = this->GetFactory(factory_from_index)->GetFactoryType();
+
+        std::vector<int> indexxxx;
+        for (auto item : this->globalFactoryMap_[factory_from_type]) {
+
+        }
+
+
+
+
+
+        for (int factory_to_index = 0; factory_to_index < this->factoryTotalNum_; ++factory_to_index) {
+            if (factory_from_index == factory_to_index){
+                continue;
+            } else {
+                double factory_to_x = this->GetFactory(factory_to_index)->GetCoordinate()[0];
+                double factory_to_y = this->GetFactory(factory_to_index)->GetCoordinate()[1];
+                double distance = sqrt(pow(factory_from_x - factory_to_x, 2) + pow(factory_from_y - factory_to_y, 2));
+
+
+
+
+            }
+
+
+        }
+    }
+
+
+
+    return false;
 }
 
 int Context::GetFrameId() const {
@@ -401,46 +472,153 @@ Context::AboutToCrash(std::shared_ptr<Robot> robot1, std::shared_ptr<Robot> robo
     if (!triangle_condition){
         return false;
     }
-    std::cerr << "triangle_condition passed\t";
+//    std::cerr << "triangle_condition passed!!!" << std::endl;
 
     // 将1和2间的距离作为新坐标轴正方向，根据行进方向判断是否相撞
-    //TODO: 象限判断错误s
     float theta_distance = std::atan2(vector_y_between, vector_x_between);
     float orientation1_new = orientation1 - theta_distance;
     float orientation2_new = orientation2 - theta_distance;
+//    std::cerr << "theta_distance: " <<  180 * theta_distance / M_PI
+//    << " | orientation1_old: " <<  180 * orientation1 / M_PI
+//    << " | orientation2_old: " <<  180 * orientation2 / M_PI << std::endl;
     float left_angle = 0.0f;
     float right_angle = 0.0f;
 
-    if (robot1->GetCoordinate()[0] > robot2->GetCoordinate()[0]){
+    if (robot1->GetCoordinate()[0] < robot2->GetCoordinate()[0]){
         left_angle = orientation1_new;
         right_angle = orientation2_new;
-        std::cerr << "R1_LEFT_angle: " << 180 * orientation1_new / M_PI << ", R2_RIGHT_angle: " << orientation2_new << std::endl;
+//        std::cerr << "LEFT is " << robot1->GetRobotID() << "\tRIGHT is " << robot2->GetRobotID() << std::endl;
     }
     else{
         left_angle = orientation2_new;
         right_angle = orientation1_new;
-        std::cerr << "R2_LEFT_angle: " << 180 * orientation2_new / M_PI << ", R1_RIGHT_angle: " << orientation1_new << std::endl;
+//        std::cerr << "LEFT is " << robot1->GetRobotID() << "\tRIGHT is " << robot2->GetRobotID() << std::endl;
     }
+    std::cerr << "LEFT_angle: " << 180 * left_angle / M_PI << ", RIGHT_angle: " << 180 * right_angle / M_PI << std::endl;
 
     // 根据象限判断是否有相撞的可能。左1象限右2象限 或 左4象限右3象限
-    bool condition_left1_right2 = (left_angle >= 0 && left_angle <= M_PI / 2) && (right_angle >= M_PI / 2 && right_angle <= M_PI);
-    bool condition_left4_right3 = (left_angle >= -M_PI/2 && left_angle <= 0) && (right_angle >= -M_PI && right_angle <= -M_PI/2);
+    bool left1 = left_angle >= 0 && left_angle <= M_PI / 2;
+    bool left4 = left_angle >= -M_PI/2 && left_angle <= 0;
+    bool right2 = right_angle >= M_PI / 2 && right_angle <= M_PI;
+    bool right3 = right_angle >= -M_PI && right_angle <= -M_PI/2;
+    bool condition_left1_right2 = (left1) && (right2);
+    bool condition_left4_right3 = (left4) && (right3);
 
-//    if (!condition_left1_right2 || !condition_left4_right3){
-//        return false;
-//    }
+//    std::cerr << "left_angle >= -M_PI/2: " << (left_angle >= -M_PI/2) << "\tleft_angle <= 0: " << (left_angle <= 0) << std::endl;
 
-    std::cerr << "CRASH WARNING!!!" << std::endl;
-    return true;
+//    std::cerr << "condition_left1_right2: " << condition_left1_right2 << " | condition_left4_right3: " << condition_left4_right3 << std::endl;
+
+    // 直线相撞判断
+    double min_angle = 2; // 最小角度，单位：度
+    double min_condition = M_PI * min_angle / 180;
+//    std::cerr << "std::abs(left_angle + right_angle): " << 180 * std::abs(left_angle + right_angle - M_PI) / M_PI << std::endl;
+    if ((std::abs(left_angle) + std::abs(right_angle) - M_PI) < min_condition){
+        if ((left1 && right3) || (left4 && right2)){
+            return true;
+            std::cerr << "CRASH WARNING!!!" << std::endl;
+        }
+    }
+
+    // 斜着相撞判断
+    if ((left1 && right2) || (left4 && right3)){
+        std::cerr << "CRASH WARNING!!!" << std::endl;
+        return true;
+    }
+
+    return false;
 }
 
 float Context::GetDt() const {
     return dt;
 }
 
-bool Context::UpdateGraph() {
-    return false;
+void Context::FactoriesClassification() {
+    for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
+        FactoryType current_type = this->allFactories_[factory_index]->GetFactoryType();
+        switch (current_type) {
+            case FactoryType::UNKNOWN:
+                std::cerr << "Factory NO." << this->allFactories_[factory_index]->GetFactoryId() << "type is UNKNOWN!!!" << std::endl;
+                break;
+
+            case FactoryType::MATERIAL_1:
+                oneFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::A);
+                this->oneFactoriesIndex_.push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_4][MATERIAL_1].push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_5][MATERIAL_1].push_back(factory_index);
+                break;
+            case FactoryType::MATERIAL_2:
+                twoFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::A);
+                this->twoFactoriesIndex_.push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_4][MATERIAL_2].push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_6][MATERIAL_2].push_back(factory_index);
+                break;
+            case FactoryType::MATERIAL_3:
+                threeFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::A);
+                this->threeFactoriesIndex_.push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_5][MATERIAL_3].push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_6][MATERIAL_3].push_back(factory_index);
+                break;
+
+            case FactoryType::FACTORY_4:
+                fourFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
+                this->fourFactoriesIndex_.push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_7][FACTORY_4].push_back(factory_index);
+                // 先不考虑456卖到9
+//                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+                break;
+            case FactoryType::FACTORY_5:
+                fiveFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
+                this->fiveFactoriesIndex_.push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_7][FACTORY_5].push_back(factory_index);
+                // 先不考虑456卖到9
+//                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+                break;
+            case FactoryType::FACTORY_6:
+                sixFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
+                this->sixFactoriesIndex_.push_back(factory_index);
+                this->globalFactoryMap_[FACTORY_7][FACTORY_6].push_back(factory_index);
+                // 先不考虑456卖到9
+//                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+                break;
+
+            case FactoryType::FACTORY_7:
+                sevenFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::C);
+                this->sevenFactoriesIndex_.push_back(factory_index);
+                this->globalFactoryMap_[SELLER_8][FACTORY_7].push_back(factory_index);
+                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+                break;
+
+            case FactoryType::SELLER_8:
+                eightFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::D);
+                this->eightFactoriesIndex_.push_back(factory_index);
+                break;
+            case FactoryType::SELLER_9:
+                nineFactories_.push_back(this->allFactories_[factory_index]);
+                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::D);
+                this->nineFactoriesIndex_.push_back(factory_index);
+                break;
+        }
+    }
+
+
+//    for (auto &item : this->oneFactories_) { // 潜在bug？
+//        std::cerr << item->GetFactoryId() << " ";
+//    }
+//    std::cerr << std::endl;
+
 }
+
+
+
+
 
 
 

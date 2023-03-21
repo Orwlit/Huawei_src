@@ -5,6 +5,8 @@
 #ifndef HUAWEI_DISTRIBUTOR_H
 #define HUAWEI_DISTRIBUTOR_H
 #pragma once
+#include <climits>
+#include <stack>
 
 #include "context.h"
 #include "robot.h"
@@ -33,6 +35,7 @@ public:
     //Basic Function
     bool MaintainGraph(); //从context中维护图结构
     void FloydMinDistance() const;
+    std::vector<double> BellmanFordDistance(std::vector<std::vector<int>>& graph, int V, int src, int target);
 
     //Strategies
     bool StrategyAimless();
@@ -46,22 +49,18 @@ public:
     //Strategy conversion
     void Distribute();
 
-
-    //Calculate Flag
-    bool CalculateFlag();
-
     //Tasks
     bool BuyTask();
     bool SellTask();
 
-    bool SetPriority();
-
     bool run();
 private:
     std::shared_ptr<Context> context;
+    std::vector<std::vector<double>> globalGraph_;
+    std::vector<std::vector<double>> historyGraph_;
 
-    double DISCONNECT = 0;
-    double INFINITE = 999.0;
+    const double DISCONNECT_ = 0.0;
+    const double INFINITE_ = 999.0; // 表示无穷大
 
 };
 #endif //HUAWEI_DISTRIBUTOR_H

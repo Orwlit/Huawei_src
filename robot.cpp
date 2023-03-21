@@ -219,11 +219,13 @@ bool Robot::SetOrientation(float orientation) {
         return false;
     }
     else{
-        if (orientation > 0){
-            this->orientation_ = orientation;
-        } else{
-            this->orientation_ = static_cast<float>(2.0 * M_PI + orientation);
-        }
+//        // 将朝向均变为正的
+//        if (orientation > 0){
+//            this->orientation_ = orientation;
+//        } else{
+//            this->orientation_ = static_cast<float>(2.0 * M_PI + orientation);
+//        }
+        this->orientation_ = orientation;
         return true;
     }
 }
