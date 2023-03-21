@@ -10,7 +10,9 @@
 Distributor::Distributor() {
     std::shared_ptr<Context> sharedPtr = std::make_shared<Context>();
     this->context = sharedPtr;
+    this->nodeTotalNum_ = this->context->GetNodeTotalNum();
 
+    this->historyGraph_ = DeepCopy2DVector(this->context->GetInitialHistoryGraph());
 
     std::cout << "OK" << std::flush; // 准备就绪，开始答题
 }
@@ -202,4 +204,21 @@ std::pair<double, std::vector<int>> Distributor::BellmanFordRoute(int src, int t
     return _result_;
 }
 
+// 根据传入的工厂id和类型，找到所有对应的权值（矩阵块），并返回对应目标工厂的id
+std::vector<int> Distributor::FromIdTypeFindEdgeIndex(int factory_index, FactoryType to_factoryType) const {
+    int factory_shift = this->context->GetRobotTotalNum();
+    FactoryType current_type = this->context->GetFactory(factory_index)->GetFactoryType();
+    std::vector<int> to_index = this->context->GetGlobalFactoryTypeMap().at(current_type).at(to_factoryType);
 
+    return to_index;
+};
+
+std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector<std::vector<double>>& orig) {
+    std::vector<std::vector<double>> copy(orig.size(), std::vector<double>(orig[0].size()));
+    for (size_t i = 0; i < orig.size(); i++) {
+        for (size_t j = 0; j < orig[i].size(); j++) {
+            copy[i][j] = orig[i][j];
+        }
+    }
+    return copy;
+}

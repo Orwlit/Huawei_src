@@ -43,12 +43,18 @@ public:
     //Tasks
     void DistributeTask(std::vector<int> route);
 
+    // 查找工具
+    [[nodiscard]] std::vector<int> FromIdTypeFindEdgeIndex(int factory_index, FactoryType to_factoryType) const;
+    std::vector<std::vector<double>> DeepCopy2DVector(const std::vector<std::vector<double>>& orig);
+
     bool run();
 private:
     std::shared_ptr<Context> context;
     std::vector<std::vector<double>> globalGraph_;
     std::vector<std::vector<double>> historyGraph_;
+    std::map<int, std::map<FactoryType, std::vector<double*>>> idTypeEdge_; // 依次按工厂id、工厂类型type进行索引，返回这个id的工厂对应所有type类型的权值指针
 
+    int nodeTotalNum_;
 
     const double DISCONNECT_ = 0.0;
     const double INFINITE_ = 999.0; // 表示无穷大

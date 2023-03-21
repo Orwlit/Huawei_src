@@ -25,7 +25,7 @@ public:
     void FactoriesClassification();
 
     static std::map<FactoryType, bool> WarehouseStateConversion(FactoryType type, int rawInfo);
-    std::vector<double*> FromIdTypeFindEdge(int factory_index, FactoryType factoryType) const;
+    void PrintHistoryMap() const;
 
     //Distance between Factories or Robots
     [[nodiscard]] float DistanceFF(int factory1_ID, int factory2_ID) const;
@@ -46,7 +46,9 @@ public:
     [[nodiscard]] const std::vector<std::shared_ptr<Factory>> &GetAllFactories() const;
     [[nodiscard]] std::shared_ptr<Robot> GetRobot(int robotIndex) const;
     [[nodiscard]] std::shared_ptr<Factory> GetFactory(int factoryIndex) const;
-
+    [[nodiscard]] const std::map<FactoryType, std::map<FactoryType, std::vector<int>>> &GetGlobalFactoryTypeMap() const;
+    [[nodiscard]] const std::vector<std::vector<double>> &GetInitialHistoryGraph() const;
+    [[nodiscard]] int GetNodeTotalNum() const;
     [[nodiscard]] int GetFactoryTotalNum() const;
     [[nodiscard]] const int GetRobotTotalNum() const;
 
@@ -75,18 +77,17 @@ private:
     std::vector<int> eightFactoriesIndex_;
     std::vector<int> nineFactoriesIndex_;
 
-    std::map<int, std::map<FactoryType, std::vector<double*>>> idTypeEdge_; // 依次按工厂id、工厂类型type进行索引，返回这个id的工厂对应所有type类型的权值指针
-    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryTypeMap_; //按工厂类型的索引，例如FACTORY_4到MATERIAL_1的全部工厂ID
+    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryTypeMap_;
+    //按工厂类型的索引，例如FACTORY_4到MATERIAL_1的全部工厂ID
     std::vector<int> routeRobotSeller_; //机器人到卖家的最短距离，第一个值为机器人ID，后面是路线上的工厂ID
 
     std::vector<std::vector<double>> initialHistoryGraph_;
-
-//    std::map<int, float*> factory_coordinate_;
 
     int frameID_;
     int previousFrameID_;
     int currentMoney_;
     int factoryTotalNum_;
+    int nodeTotalNum_;
     float dt;
     bool SYSTEM_ENABLE_;
 

@@ -8,22 +8,23 @@ Context::Context() {
 
     this->currentMoney_ = 0;
     this->factoryTotalNum_ = 0;
-
     this->frameID_ = 0;
     this->previousFrameID_ = 0;
-
-
-
-
-//    std::cout << "OK" << std::flush;
     this->SYSTEM_ENABLE_ = true;
 
+    // 初始化，主要完成Factory对象的信息初始化
     if(!(this->Initialize())){
         std::cerr << "Initialization Failed" << std::endl;
     }
     std::cerr << "Initialization complete" << std::endl;
 
-//    this->GenerateHistoryGraph();
+    this->nodeTotalNum_ = this->factoryTotalNum_ + this->robotTotalNum_;
+
+    // 创建历史图，并检查是否满足对称矩阵条件
+    if (!(this->GenerateHistoryGraph())){
+        std::cerr << "GenerateHistoryGraph in Context::Context() ERROR!!!" << std::endl;
+    }
+
 }
 
 bool Context::UpdateAllStatus() {
@@ -33,10 +34,6 @@ bool Context::UpdateAllStatus() {
         std::cerr << "frameID_: " << this->frameID_ << "\t"
                   << "currentMoney_: " << this->currentMoney_ << std::endl;
         return false;
-    }
-
-    if (this->frameID_ == 1){
-        this->FactoriesClassification();
     }
 
 //    std::cerr << "frameID_: " << this->frameID_ << "\t" << "UpdateAllStatus start!!!" << std::endl;
@@ -388,9 +385,6 @@ bool Context::Initialize() {
 //                }
 //                std::cerr << std::endl;
 
-
-
-
                 ++factoryID;
                 continue;
             }
@@ -422,12 +416,16 @@ bool Context::Initialize() {
 
 bool Context::GenerateHistoryGraph() {
     // 初始全置为无穷大
+    initialHistoryGraph_.resize(this->nodeTotalNum_);
     std::vector<double> infinite_vector;
-    for (int i = 0; i < (this->factoryTotalNum_ + this->robotTotalNum_); ++i) {
-        for (int j = 0; j < (this->factoryTotalNum_ + this->robotTotalNum_); ++j) {
-            infinite_vector.push_back(this->INFINITE_);
+    infinite_vector.resize(this->nodeTotalNum_);
+    for (int i = 0; i < this->nodeTotalNum_; ++i) {
+        initialHistoryGraph_[i] = infinite_vector;
+    }
+    for (int i = 0; i < this->nodeTotalNum_; ++i) {
+        for (int j = 0; j < this->nodeTotalNum_; ++j) {
+            this->initialHistoryGraph_[i][j] = this->INFINITE_;
         }
-        initialHistoryGraph_.push_back(infinite_vector);
     }
 
     // 机器人到除了89的权值设为距离
@@ -455,13 +453,30 @@ bool Context::GenerateHistoryGraph() {
         double factory_from_x = this->GetFactory(factory_from_index)->GetCoordinate()[0];
         double factory_from_y = this->GetFactory(factory_from_index)->GetCoordinate()[1];
         FactoryType factory_from_type = this->GetFactory(factory_from_index)->GetFactoryType();
-
+        std::vector<int> factories_to;
+        for (const auto& factory_to : this->globalFactoryTypeMap_[factory_from_type]) {
+            for (auto factory_to_index : factory_to.second) {
+                double factory_to_x = this->GetFactory(factory_to_index)->GetCoordinate()[0];
+                double factory_to_y = this->GetFactory(factory_to_index)->GetCoordinate()[1];
+                double distance = sqrt(pow(factory_to_x - factory_from_x, 2) + pow(factory_to_y - factory_from_y, 2));
+                this->initialHistoryGraph_[factory_from_index + this->factoryIDShift_][factory_to_index + this->factoryIDShift_] = distance;
+                this->initialHistoryGraph_[factory_to_index + this->factoryIDShift_][factory_from_index + this->factoryIDShift_] = distance;
+            }
+        }
 
     }
 
-
-
-    return false;
+    // 检查initialHistoryGraph_是否为对称矩阵，且维数为(nodeTotalNum_)x(nodeTotalNum_)
+    bool SymmetricMatrixCheck = true;
+    for (int i = 0; i < this->initialHistoryGraph_.size(); ++i) {
+        for (int j = 0; j < this->initialHistoryGraph_[i].size(); ++j) {
+            if (initialHistoryGraph_[i][j] != initialHistoryGraph_[j][i]){
+                std::cerr << "initialHistoryGraph_ NOT a Symmetric Matrix !!!" << std::endl;
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 int Context::GetFrameId() const {
@@ -648,12 +663,7 @@ float Context::GetDt() const {
 }
 
 void Context::FactoriesClassification() {
-    for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
-        FactoryType current_type = this->allFactories_[factory_index]->GetFactoryType();
 
-
-
-    }
 }
 
 inline std::vector<int> get_the_one_position(int num)
@@ -722,13 +732,46 @@ const int Context::GetRobotTotalNum() const {
     return robotTotalNum_;
 }
 
-std::vector<double *> Context::FromIdTypeFindEdge(int factory_index, FactoryType factoryType) const {
-    //TODO: 根据传入的工厂id和类型，找到所有对应的权值（矩阵块），并返回这个矩阵块的指针
-    std::vector<double *> result;
+const std::map<FactoryType, std::map<FactoryType, std::vector<int>>> &Context::GetGlobalFactoryTypeMap() const {
+    return globalFactoryTypeMap_;
+}
+
+const std::vector<std::vector<double>> &Context::GetInitialHistoryGraph() const {
+    return initialHistoryGraph_;
+}
+
+int Context::GetNodeTotalNum() const {
+    return nodeTotalNum_;
+}
+
+// 打印历史图信息
+void Context::PrintHistoryMap() const {
+    std::cerr << "history graph: " << initialHistoryGraph_.size() << "x" << initialHistoryGraph_[0].size() << std::endl;
+    std::cerr << " \t";
+    for (int i = 0; i < this->robotTotalNum_; ++i) {
+        std::cerr << this->GetRobot(i)->GetRobotID() << "\t";
+    }
+    for (int i = 0; i < this->factoryTotalNum_; ++i) {
+        std::cerr << this->GetFactory(i)->GetFactoryType() << "\t";
+    }
+    std::cerr << std::endl;
+
+    for (int i = 0; i < this->initialHistoryGraph_.size(); ++i) {
+        if (i <= 3){
+            std::cerr << this->GetRobot(i)->GetRobotID() << "\t";
+        }else{
+            std::cerr << this->GetFactory(i- this->factoryIDShift_)->GetFactoryType() << "\t";
+        }
+        for (int j = 0; j < this->initialHistoryGraph_[i].size(); ++j) {
+            std::cerr << initialHistoryGraph_[i][j] << "\t";
+        }
+//        std::cerr << initialHistoryGraph_[i].size() << " ";
+        std::cerr << std::endl;
+    }
+}
 
 
-    return result;
-};
+
 
 
 
