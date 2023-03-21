@@ -317,4 +317,12 @@ float Robot::GetLinearVelocityY() const {
     return linearVelocity_y_;
 }
 
+RobotFlag Robot::GetFlag() const {
+    return flag;
+}
+
+void Robot::SetFlag(RobotFlag flag) {
+    Robot::flag = flag;
+}
+
 

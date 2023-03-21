@@ -720,6 +720,14 @@ int Context::GetFactoryTotalNum() const {
 
 const int Context::GetRobotTotalNum() const {
     return robotTotalNum_;
+}
+
+std::vector<double *> Context::FromIdTypeFindEdge(int factory_index, FactoryType factoryType) const {
+    //TODO: 根据传入的工厂id和类型，找到所有对应的权值（矩阵块），并返回这个矩阵块的指针
+    std::vector<double *> result;
+
+
+    return result;
 };
 
 

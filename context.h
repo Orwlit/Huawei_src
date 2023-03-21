@@ -25,6 +25,7 @@ public:
     void FactoriesClassification();
 
     static std::map<FactoryType, bool> WarehouseStateConversion(FactoryType type, int rawInfo);
+    std::vector<double*> FromIdTypeFindEdge(int factory_index, FactoryType factoryType) const;
 
     //Distance between Factories or Robots
     [[nodiscard]] float DistanceFF(int factory1_ID, int factory2_ID) const;
@@ -81,7 +82,6 @@ private:
     std::vector<std::vector<double>> initialHistoryGraph_;
 
 //    std::map<int, float*> factory_coordinate_;
-
 
     int frameID_;
     int previousFrameID_;

@@ -58,6 +58,7 @@ public:
     bool SetLinearVelocity(float linearVelocity_x, float linearVelocity_y);
     bool SetOrientation(float orientation);
     bool SetCoordinate(float x, float y);
+    void SetFlag(RobotFlag flag);
 
     //Getter
     [[nodiscard]] int GetRobotID() const ;
