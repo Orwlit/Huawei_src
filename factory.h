@@ -36,7 +36,7 @@ enum FactoryFlag{
 
 class Factory{
 private:
-    std::map<int, int> warehouseMap;
+    std::map<int, int> warehouseMap_;
 
     int factoryID_;
     FactoryType factoryType_;
@@ -50,7 +50,7 @@ private:
 //    std::vector<std::pair<int, int>> warehouseState_
     int productState_; //产品格状态
 
-    int MAX_REMAINING_FRAME;
+    int MAX_REMAINING_FRAME_;
 public:
     Factory();
     Factory(int factoryID, FactoryType factoryType, float x_initial, float y_initial);;

@@ -18,15 +18,15 @@ private:
 
 
     int robotID_;
-    RobotFlag flag;
+    RobotFlag flag_;
 //    Priority priority;
 
-    float MAX_LINEAR_VELOCITY;
-    float MAX_ANGULAR_VELOCITY;
-    float MIN_LINEAR_VELOCITY;
-    float MIN_ANGULAR_VELOCITY;
+    float MAX_LINEAR_VELOCITY_;
+    float MAX_ANGULAR_VELOCITY_;
+    float MIN_LINEAR_VELOCITY_;
+    float MIN_ANGULAR_VELOCITY_;
 
-    float radiusBasic, radiusCarry;
+    float radiusBasic_, radiusCarry_;
 
     int nearbyFactoryID_; //-1：表示当前没有处于任何工作台附近   [0,工作台总数-1] ：表示某工作台的下标，从0开始，按输入顺序定。当前机器人的所有购买、出售行为均针对该工作台进行。
     int carryingType_; //范围[0,7] 0表示未携带物品 1-7表示对应物品

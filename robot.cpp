@@ -12,15 +12,15 @@ Robot::Robot() {
 
 Robot::Robot(int robotID, float x_initial, float y_initial) {
     this->robotID_ = robotID;
-    this->flag = RobotFlag::ROBOT_READY;
+    this->flag_ = RobotFlag::ROBOT_READY;
 //    this->priority = Priority::ANYWAY;
     this->coordinate_[0] = x_initial;
     this->coordinate_[1] = y_initial;
 
-    this->MAX_LINEAR_VELOCITY = 6.0f;
-    this->MIN_LINEAR_VELOCITY = -2.0f;
-    this->MAX_ANGULAR_VELOCITY = M_PI;
-    this->MIN_ANGULAR_VELOCITY = -M_PI;
+    this->MAX_LINEAR_VELOCITY_ = 6.0f;
+    this->MIN_LINEAR_VELOCITY_ = -2.0f;
+    this->MAX_ANGULAR_VELOCITY_ = M_PI;
+    this->MIN_ANGULAR_VELOCITY_ = -M_PI;
 }
 
 void Robot::TrickLoop() {
@@ -29,7 +29,7 @@ void Robot::TrickLoop() {
 
 void Robot::HighSpeedMove(float destination_x, float destination_y, float dt) {
     // 14帧会让6减速到0
-    float SLOW_DOWN_DISTANCE = 14.0f * dt * this->MAX_LINEAR_VELOCITY;
+    float SLOW_DOWN_DISTANCE = 14.0f * dt * this->MAX_LINEAR_VELOCITY_;
 
     float distance_x = destination_x - this->GetCoordinate()[0];
     float distance_y = destination_y - this->GetCoordinate()[1];
@@ -85,7 +85,7 @@ void Robot::HighSpeedMove(float destination_x, float destination_y, float dt) {
 //
 //    this->RotateAngular(d_theta, dt);
 
-//    double max_rotation_in_dt = this->MAX_ANGULAR_VELOCITY * dt;
+//    double max_rotation_in_dt = this->MAX_ANGULAR_VELOCITY_ * dt;
 //
 //    double condition = std::abs(d_theta) - std::abs(max_rotation_in_dt);
 ////    std::cerr << "Robot NO." << this->robotID_
@@ -95,11 +95,11 @@ void Robot::HighSpeedMove(float destination_x, float destination_y, float dt) {
 //
 //    if (condition > 0){ //dt时间内最大角速度不足以补齐d_theta
 //        if (d_theta > 0){
-//            this->Rotate(this->MIN_ANGULAR_VELOCITY);
-////            std::cerr << "MAX_ROTATE+, " << "Rotate rate" << this->MIN_ANGULAR_VELOCITY << std::endl;
+//            this->Rotate(this->MIN_ANGULAR_VELOCITY_);
+////            std::cerr << "MAX_ROTATE+, " << "Rotate rate" << this->MIN_ANGULAR_VELOCITY_ << std::endl;
 //        }
 //        if (d_theta < 0){
-//            this->Rotate(this->MAX_ANGULAR_VELOCITY);
+//            this->Rotate(this->MAX_ANGULAR_VELOCITY_);
 ////            std::cerr << "MAX_ROTATE-" << std::endl;
 //        }
 //    }
@@ -176,10 +176,10 @@ bool Robot::SetNearbyFactoryID(int nearbyFactory) {
 bool Robot::SetCarryingType(int carryingType) {
     this->carryingType_ = carryingType;
     if (carryingType == 0){
-        this->flag = ROBOT_READY;
+        this->flag_ = ROBOT_READY;
     }
     else{
-        this->flag = ROBOT_BUSY;
+        this->flag_ = ROBOT_BUSY;
     }
     return true;
 }
@@ -196,11 +196,11 @@ bool Robot::SetAngularVelocity(float angularVelocity) {
 }
 
 bool Robot::SetLinearVelocity(float linearVelocity_x, float linearVelocity_y) {
-//    if (linearVelocity_x > this->MAX_LINEAR_VELOCITY || linearVelocity_x < this->MIN_LINEAR_VELOCITY){
+//    if (linearVelocity_x > this->MAX_LINEAR_VELOCITY_ || linearVelocity_x < this->MIN_LINEAR_VELOCITY_){
 //        std::cerr << "Robot " << this->robotID_ << " LinearVelocity_x OUT OF RANGE!!!" << std::endl;
 //        return false;
 //    }
-//    if (linearVelocity_y > this->MAX_LINEAR_VELOCITY || linearVelocity_y < this->MIN_LINEAR_VELOCITY){
+//    if (linearVelocity_y > this->MAX_LINEAR_VELOCITY_ || linearVelocity_y < this->MIN_LINEAR_VELOCITY_){
 //        std::cerr << "Robot " << this->robotID_ << " LinearVelocity_y OUT OF RANGE!!! "
 //                  << "linearVelocity_y: " << linearVelocity_y << std::endl;
 //
@@ -251,10 +251,10 @@ bool Robot::Reachable(float destination_x, float destination_y) const {
     float current_distance_y = destination_y - this->coordinate_[1];
     double distance = sqrt(pow(current_distance_x, 2) + pow(current_distance_y, 2));
 
-    if ((this->flag == ROBOT_READY) && (distance < this->radiusBasic)){
+    if ((this->flag_ == ROBOT_READY) && (distance < this->radiusBasic_)){
         return true;
     }
-    else if ((this->flag == ROBOT_BUSY) && (distance < this->radiusCarry)){
+    else if ((this->flag_ == ROBOT_BUSY) && (distance < this->radiusCarry_)){
         return true;
     }
 
@@ -262,7 +262,7 @@ bool Robot::Reachable(float destination_x, float destination_y) const {
 }
 
 RobotFlag Robot::GetFlag() const {
-    return flag;
+    return flag_;
 }
 
 int Robot::GetNearbyFactoryId() const {
@@ -290,16 +290,16 @@ const float *Robot::GetCoordinate() const {
 }
 
 void Robot::RotateAngular(float angular, float dt) const {
-    double max_rotation_in_dt = this->MAX_ANGULAR_VELOCITY * dt;
+    double max_rotation_in_dt = this->MAX_ANGULAR_VELOCITY_ * dt;
     double condition = std::abs(angular) - std::abs(max_rotation_in_dt);
 
     if (condition > 0){ //dt时间内最大角速度不足以补齐d_theta
         if (angular > 0){
-            this->Rotate(this->MIN_ANGULAR_VELOCITY);
-//            std::cerr << "MAX_ROTATE+, " << "Rotate rate" << this->MIN_ANGULAR_VELOCITY << std::endl;
+            this->Rotate(this->MIN_ANGULAR_VELOCITY_);
+//            std::cerr << "MAX_ROTATE+, " << "Rotate rate" << this->MIN_ANGULAR_VELOCITY_ << std::endl;
         }
         if (angular < 0){
-            this->Rotate(this->MAX_ANGULAR_VELOCITY);
+            this->Rotate(this->MAX_ANGULAR_VELOCITY_);
 //            std::cerr << "MAX_ROTATE-" << std::endl;
         }
     }
@@ -317,12 +317,8 @@ float Robot::GetLinearVelocityY() const {
     return linearVelocity_y_;
 }
 
-RobotFlag Robot::GetFlag() const {
-    return flag;
-}
-
 void Robot::SetFlag(RobotFlag flag) {
-    Robot::flag = flag;
+    Robot::flag_ = flag;
 }
 
 

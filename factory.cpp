@@ -8,26 +8,26 @@
 Factory::Factory() {
     this->factoryType_ = FactoryType::UNKNOWN;
 
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[2] = 1;
-    this->warehouseMap[4] = 2;
-    this->warehouseMap[8] = 3;
-    this->warehouseMap[7] = 12;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
-    this->warehouseMap[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[2] = 1;
+    this->warehouseMap_[4] = 2;
+    this->warehouseMap_[8] = 3;
+    this->warehouseMap_[7] = 12;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
+    this->warehouseMap_[0] = 0;
 }
 
 bool Factory::SetType(FactoryType type) {
@@ -59,9 +59,9 @@ FactoryType Factory::GetFactoryType() const {
 }
 
 bool Factory::SetRemainingFrame(int time) {
-    if (time > this->MAX_REMAINING_FRAME){
+    if (time > this->MAX_REMAINING_FRAME_){
         std::cerr << "FactoryID: " << this->factoryID_
-                  << "\tSetRemainingFrame OUT OF RANGE, MAX_REMAINING_FRAME: " << this->MAX_REMAINING_FRAME << std::endl;
+                  << "\tSetRemainingFrame OUT OF RANGE, MAX_REMAINING_FRAME_: " << this->MAX_REMAINING_FRAME_ << std::endl;
         return false;
     }
     this->remainingFrame_ = time;
@@ -93,7 +93,7 @@ Factory::Factory(int factoryID, FactoryType factoryType, float x_initial, float 
     this->coordinate_[0] = x_initial;
     this->coordinate_[1] = y_initial;
 
-    this->MAX_REMAINING_FRAME = 1000; //7号的时间为1000帧
+    this->MAX_REMAINING_FRAME_ = 1000; //7号的时间为1000帧
 }
 
 int Factory::GetFactoryId() const {
