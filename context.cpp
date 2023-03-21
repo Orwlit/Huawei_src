@@ -647,7 +647,9 @@ void Context::FactoriesClassification() {
 std::map<FactoryType, bool> Context::WarehouseStateConversion(int rawInfo){
     //TODO: 给一个原始仓库信息，返回一个std::map<FactoryType, bool> warehouseState
     std::map<FactoryType, bool> warehouseState;
-
+    //kjhkhlhj
+    //johlkhlkh
+    //kgjklhlhuj
     return warehouseState;
 };
 
