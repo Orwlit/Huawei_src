@@ -21,9 +21,6 @@ bool Distributor::run() {
         //开始与控制台交互
         std::cout << this->context->GetFrameId() << std::endl;
 
-//        std::cout << "forward 0 6" << std::endl;
-//        std::cout << "rotate 0 " << M_PI << std::endl;
-
 
 
 //        if (this->context->GetRobot(0)->GetLinearVelocity() < 0.1){
@@ -139,5 +136,70 @@ void Distributor::DistributeTask(std::vector<int> route) {
     // 2. 分配任务后将相应路径的权值设为正无穷
 }
 
+/**
+ * @brief 使用bellman_ford算法在图中寻找最短路径，并返回距离以及途径节点
+ *
+ * @param _graph_(现this->globalGraph_)  图
+ * @param V                             图中节点的总数量
+ * @param src                           出发节点
+ * @param target                        目标节点
+ * @return pair<double, vector<int>>    最短路径距离，途径节点序号
+ */
+std::pair<double, std::vector<int>> Distributor::BellmanFordRoute(int src, int target) {
+    std::pair<double, std::vector<int>> _result_;
+    if (src > 3){ //起始点不是机器人编号，打印错误信息
+        std::cerr << "BellmanFord src ERROR, src: " << src << "; src should < 3" << std::endl;
+        return _result_;
+    }
+
+    auto V = this->context->GetRobotTotalNum() + this->context->GetFactoryTotalNum();
+    const int INF = this->INFINITE_; //将double转换为int???
+    // 初始化距离数组和路径数组
+    std::vector<int> dist(V, INF);
+    std::vector<int> path(V, -1);
+    dist[src] = 0;
+    // 进行V-1轮松弛操作
+    for (int i = 0; i < V - 1; i++) {
+        for (int u = 0; u < V; u++) {
+            for (int v = 0; v < V; v++) {
+                if (this->globalGraph_[u][v] != INF && dist[u] != INF && dist[u] + this->globalGraph_[u][v] < dist[v]) {
+                    dist[v] = dist[u] + this->globalGraph_[u][v];
+                    path[v] = u; // 更新前驱节点
+                }
+            }
+        }
+    }
+    // 检查负环
+    for (int u = 0; u < V; u++) {
+        for (int v = 0; v < V; v++) {
+            if (this->globalGraph_[u][v] != INF && dist[u] != INF && dist[u] + this->globalGraph_[u][v] < dist[v]) {
+                std::cerr << "该图存在负环，无法求解最短路径" << std::endl;
+                return _result_;
+            }
+        }
+    }
+    // 输出最短路径距离
+    for (int i = 0; i < V; i++) {
+        if (i != target) continue;
+        _result_.first = dist[i];
+    }
+    // 输出最短路径途径节点
+    for (int i = 0; i < V; i++) {
+        if (i != target) continue;
+        std::stack<int> s;
+        int j = i;
+        // 从终点回溯到起点，把节点存储在stack中
+        while (j != -1) {
+            s.push(j);
+            j = path[j];
+        }
+        // 从起点一个个弹出路经节点
+        while (!s.empty()) {
+            _result_.second.emplace_back(s.top());
+            s.pop();
+        }
+    }
+    return _result_;
+}
 
 

@@ -34,7 +34,7 @@ public:
 
     //Basic Function
     bool MaintainGraph(); //从context中维护图结构
-    void FloydMinDistance() const;
+    std::pair<double, std::vector<int>> BellmanFordRoute(int src, int target);
     std::vector<double> BellmanFordDistance(std::vector<std::vector<int>>& graph, int V, int src, int target);
 
     //全局图优化，利用A层到D层最短距离，结合机器人距离派发任务。(A层：123；B层：456；C层：7；D层：89)
@@ -48,6 +48,7 @@ private:
     std::shared_ptr<Context> context;
     std::vector<std::vector<double>> globalGraph_;
     std::vector<std::vector<double>> historyGraph_;
+
 
     const double DISCONNECT_ = 0.0;
     const double INFINITE_ = 999.0; // 表示无穷大

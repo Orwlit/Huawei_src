@@ -113,7 +113,8 @@ bool Context::UpdateAllStatus() {
             std::cerr << "FactoryID: " << factory_index << " SetRemainingFrame FAILED" << std::endl;
         }
 
-        std::map<FactoryType, bool> warehouseState_cache = WarehouseStateConversion(warehouseState_raw_cache);
+        FactoryType tmp_type = this->GetFactory(factory_index)->GetFactoryType();
+        std::map<FactoryType, bool> warehouseState_cache = WarehouseStateConversion(tmp_type, warehouseState_raw_cache);
         if (!(this->allFactories_[factory_index]->SetWarehouseState(warehouseState_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
         }
@@ -250,6 +251,8 @@ bool Context::Initialize() {
                 auto factoryType = static_cast<FactoryType>(tmp);
                 this->allFactories_.push_back(std::make_shared<Factory>(factoryID, factoryType, x, y));
 //                std::cerr << "factoryID: " << factoryID << " Created, x: " << x << " y: " << y << std::endl;
+
+                this->allFactories_[factoryID];
                 ++factoryID;
                 continue;
             }
@@ -267,6 +270,7 @@ bool Context::Initialize() {
     return true;
 }
 
+// 创建历史图，注意：此时不知道各个工厂的类型
 bool Context::GenerateHistoryGraph() {
     // 初始全置为无穷大
     std::vector<double> infinite_vector;
@@ -297,36 +301,14 @@ bool Context::GenerateHistoryGraph() {
         }
     }
 
+    // 工厂间的距离设为相应距离d
     for (int factory_from_index = 0; factory_from_index < this->factoryTotalNum_; ++factory_from_index) {
         double factory_from_x = this->GetFactory(factory_from_index)->GetCoordinate()[0];
         double factory_from_y = this->GetFactory(factory_from_index)->GetCoordinate()[1];
         FactoryClass factory_from_class = this->GetFactory(factory_from_index)->GetFactoryClass();
         FactoryType factory_from_type = this->GetFactory(factory_from_index)->GetFactoryType();
 
-        std::vector<int> indexxxx;
-        for (auto item : this->globalFactoryMap_[factory_from_type]) {
 
-        }
-
-
-
-
-
-        for (int factory_to_index = 0; factory_to_index < this->factoryTotalNum_; ++factory_to_index) {
-            if (factory_from_index == factory_to_index){
-                continue;
-            } else {
-                double factory_to_x = this->GetFactory(factory_to_index)->GetCoordinate()[0];
-                double factory_to_y = this->GetFactory(factory_to_index)->GetCoordinate()[1];
-                double distance = sqrt(pow(factory_from_x - factory_to_x, 2) + pow(factory_from_y - factory_to_y, 2));
-
-
-
-
-            }
-
-
-        }
     }
 
 
@@ -402,7 +384,7 @@ std::shared_ptr<Factory> Context::GetFactory(int factoryIndex) const {
 }
 
 bool
-Context::AboutToCrash(std::shared_ptr<Robot> robot1, std::shared_ptr<Robot> robot2, float k) const {
+Context::AboutToCrash(const std::shared_ptr<Robot> &robot1, const std::shared_ptr<Robot> &robot2, float k) const {
     float robot1LinearVelocity = robot1->GetLinearVelocity();
     float robot2LinearVelocity = robot2->GetLinearVelocity();
     float robot1_dt_velocity = k * this->GetDt() * robot1LinearVelocity;
@@ -424,14 +406,6 @@ Context::AboutToCrash(std::shared_ptr<Robot> robot1, std::shared_ptr<Robot> robo
     float robot2_head_x = robot2->GetLinearVelocityX() * k * dt + robot2_x;
     float robot2_head_y = robot2->GetLinearVelocityY() * k * dt + robot2_y;
     float distance_head = sqrt(pow(robot2_head_x - robot1_head_x, 2) + pow(robot2_head_y - robot1_head_y, 2));
-
-
-//    bool vector_condition_r1_plus_r2 = ((robot1_dt_vector_x + robot2_dt_vector_x) == vector_x_between) &&
-//            ((robot1_dt_vector_y + robot2_dt_vector_y) == vector_y_between);
-//    bool vector_condition_r1_plus_d = ((robot1_dt_vector_x + vector_x_between) == robot2_dt_vector_x) &&
-//                                       ((robot1_dt_vector_y + vector_y_between) == robot2_dt_vector_y);
-//    bool vector_condition_r2_plus_d = ((robot2_dt_vector_x + vector_x_between) == robot1_dt_vector_x) &&
-//                                       ((robot2_dt_vector_y + vector_y_between) == robot1_dt_vector_y);
 
     bool triangle_condition_r1_plus_r2 = (robot1_dt_velocity + robot2_dt_velocity) > distance_between;
     bool triangle_condition_r1_plus_d = (robot1_dt_velocity + distance_between) > robot2_dt_velocity;
@@ -665,13 +639,22 @@ void Context::FactoriesClassification() {
     }
 }
 
-std::map<FactoryType, bool> Context::WarehouseStateConversion(int rawInfo){
+std::map<FactoryType, bool> Context::WarehouseStateConversion(FactoryType type, int rawInfo){
     //TODO: 给一个原始仓库信息，返回一个std::map<FactoryType, bool> warehouseState
     std::map<FactoryType, bool> warehouseState;
     //kjhkhlhj
     //johlkhlkh
     //kgjklhlhuj
     return warehouseState;
+}
+
+
+int Context::GetFactoryTotalNum() const {
+    return factoryTotalNum_;
+}
+
+const int Context::GetRobotTotalNum() const {
+    return robotTotalNum_;
 };
 
 

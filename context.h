@@ -21,7 +21,7 @@ public:
     bool GenerateHistoryGraph();
     void FactoriesClassification();
 
-    static std::map<FactoryType, bool> WarehouseStateConversion(int raw_info);
+    static std::map<FactoryType, bool> WarehouseStateConversion(FactoryType type, int rawInfo);
 
     //Distance between Factories or Robots
     [[nodiscard]] float DistanceFF(int factory1_ID, int factory2_ID) const;
@@ -29,7 +29,7 @@ public:
     [[nodiscard]] float DistanceRR(int robot1_ID, int robot2_ID) const;
 
     //防撞策略
-    [[nodiscard]] bool AboutToCrash(std::shared_ptr<Robot> robot1, std::shared_ptr<Robot> robot2, float k) const;
+    [[nodiscard]] bool AboutToCrash(const std::shared_ptr<Robot> &robot1, const std::shared_ptr<Robot> &robot2, float k) const;
 
     //Getter
     [[nodiscard]] float GetDt() const;
@@ -42,6 +42,9 @@ public:
     [[nodiscard]] const std::vector<std::shared_ptr<Factory>> &GetAllFactories() const;
     [[nodiscard]] std::shared_ptr<Robot> GetRobot(int robotIndex) const;
     [[nodiscard]] std::shared_ptr<Factory> GetFactory(int factoryIndex) const;
+
+    [[nodiscard]] int GetFactoryTotalNum() const;
+    [[nodiscard]] const int GetRobotTotalNum() const;
 
     //Setter
     void SetPreviousFrameId(int previousFrameId);
