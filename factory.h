@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
 enum FactoryType{
     UNKNOWN = 0, //一开始均设为UNKNOWN
@@ -39,12 +40,13 @@ private:
 
     int factoryID_;
     FactoryType factoryType_;
-    FactoryClass factoryClass;
+    FactoryClass factoryClass_;
     FactoryFlag factoryFlag_;
 
     float coordinate_[2];
     int remainingFrame_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
-    int warehouseState_; //仓库格状态
+    std::map<FactoryType, bool> warehouseState_; //仓库格状态
+    std::set<FactoryType> warehouseType_;
 //    std::vector<std::pair<int, int>> warehouseState_
     int productState_; //产品格状态
 
@@ -60,14 +62,21 @@ public:
     [[nodiscard]] const float* GetCoordinate() const;
     [[nodiscard]] int GetFactoryId() const;
     [[nodiscard]] int GetRemainingFrame() const;
-    [[nodiscard]] int GetWarehouseState() const;
+    [[nodiscard]] std::map<FactoryType, bool> GetWarehouseState() const;
     [[nodiscard]] int GetProductState() const;
+    [[nodiscard]] const std::set<FactoryType> &GetWarehouseType() const;
 
+    //Setter
     void SetFactoryClass(FactoryClass factoryClass);
     bool SetType(FactoryType type);
     bool SetFlag(FactoryFlag flag);
     bool SetRemainingFrame(int time);
-    bool SetWarehouseStatus(int state);
+//    void SetWarehouseType(FactoryType warehouseType);
+    bool SetWarehouseState(const std::map<FactoryType, bool> &warehouseState);
+    void SetWarehouseState(FactoryType type, bool state);
+    void SetWarehouseType(const std::set<FactoryType> &warehouseType);
+    //    bool SetWarehouseState(FactoryType type, bool state);
+//    bool SetWarehouseState(std::set<FactoryType> warehouseType);
     bool SetProductStatus(int state);
 
 

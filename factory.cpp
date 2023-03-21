@@ -68,15 +68,13 @@ bool Factory::SetRemainingFrame(int time) {
     return true;
 }
 
-bool Factory::SetWarehouseStatus(int state) {
-    if (state < 0){
-        std::cerr << "FactoryID: " << this->factoryID_
-                  << "\tSetWarehouseStatus OUT OF RANGE, should be 0 or 1: " << std::endl;
-        return false;
-    }
-
-    this->warehouseState_ = state;
+bool Factory::SetWarehouseState(const std::map<FactoryType, bool> &warehouseState) {
+    warehouseState_ = warehouseState;
     return true;
+}
+
+void Factory::SetWarehouseState(FactoryType type, bool state) {
+    this->warehouseState_[type] = state;
 }
 
 bool Factory::SetProductStatus(int state) {
@@ -106,8 +104,8 @@ int Factory::GetRemainingFrame() const {
     return remainingFrame_;
 }
 
-int Factory::GetWarehouseState() const {
-    return warehouseState_;
+std::map<FactoryType, bool> Factory::GetWarehouseState() const {
+    return this->warehouseState_;
 }
 
 int Factory::GetProductState() const {
@@ -115,11 +113,24 @@ int Factory::GetProductState() const {
 }
 
 FactoryClass Factory::GetFactoryClass() const {
-    return factoryClass;
+    return factoryClass_;
 }
 
 void Factory::SetFactoryClass(FactoryClass factoryClass) {
-    Factory::factoryClass = factoryClass;
+    this->factoryClass_ = factoryClass;
 }
+
+const std::set<FactoryType> &Factory::GetWarehouseType() const {
+    return warehouseType_;
+}
+
+void Factory::SetWarehouseType(const std::set<FactoryType> &warehouseType) {
+    if (this->warehouseType_.size() > 3){
+        std::cerr << "SetWarehouseType ERROR, length > 3" << std::endl;
+        return;
+    }
+    this->warehouseType_ = warehouseType;
+}
+
 
 

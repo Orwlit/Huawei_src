@@ -60,7 +60,7 @@ bool Context::UpdateAllStatus() {
 
     int factoryType_cache;
     int remainingFrame_cache;
-    int warehouseStatus_cache;
+    int warehouseState_raw_cache;
     int productStatus_cache;
     float factory_x_input, factory_y_input;
     for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
@@ -89,14 +89,14 @@ bool Context::UpdateAllStatus() {
             return false;
         }
 //        std::cerr << "remainingTime: " << remainingFrame_cache << std::endl;
-        std::cin >> warehouseStatus_cache >> productStatus_cache;
+        std::cin >> warehouseState_raw_cache >> productStatus_cache;
         if (std::cin.bad()) {
             std::cerr << "FACTORY Space Status READ FAILED!!!" << std::endl;
-            std::cerr << "warehouseStatus: " << warehouseStatus_cache << std::endl;
+            std::cerr << "warehouseStatus: " << warehouseState_raw_cache << std::endl;
             std::cerr << "productStatus: " << productStatus_cache << std::endl;
             return false;
         }
-//        std::cerr << "warehouseStatus: " << warehouseStatus_cache << std::endl;
+//        std::cerr << "warehouseStatus: " << warehouseState_raw_cache << std::endl;
 //        std::cerr << "productStatus: " << productStatus_cache << std::endl;
 
 
@@ -104,51 +104,23 @@ bool Context::UpdateAllStatus() {
         //更新对应的工厂信息 根据坐标查找对应工厂
 //        bool isUpdate = false;
         //刷新工厂类型，希望不刷新。若刷新了，则打印错误信息到cerr
-        if (this->allFactories_[factory_index]->SetType(static_cast<FactoryType>(factoryType_cache))){
+        if (this->allFactories_[factory_index]->SetType(static_cast<FactoryType>(factoryType_cache))) {
             std::cerr << "FactoryID: " << factory_index << " has CHANGED TYPE!!!" << std::endl;
         }
+
         //刷新其他信息
-        if (!(this->allFactories_[factory_index]->SetRemainingFrame(remainingFrame_cache))){
+        if (!(this->allFactories_[factory_index]->SetRemainingFrame(remainingFrame_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetRemainingFrame FAILED" << std::endl;
         }
-        if (!(this->allFactories_[factory_index]->SetWarehouseStatus(warehouseStatus_cache))){
-            std::cerr << "FactoryID: " << factory_index << " SetWarehouseStatus FAILED!!!" << std::endl;
+
+        std::map<FactoryType, bool> warehouseState_cache = WarehouseStateConversion(warehouseState_raw_cache);
+        if (!(this->allFactories_[factory_index]->SetWarehouseState(warehouseState_cache))) {
+            std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
         }
-        if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))){
+
+        if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
         }
-//        isUpdate = true;
-
-
-//        for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
-//            double distance = 0.0;
-//            const float factory_x = this->GetAllFactories()[factory_index]->GetCoordinate()[0];
-//            const float factory_y = this->GetAllFactories()[factory_index]->GetCoordinate()[1];
-//
-//            distance = sqrt(pow((factory_x - factory_x_input), 2) + pow((factory_y - factory_y_input), 2));
-//            if (distance < this->MINIMUM_EQUAL_VALUE_){
-//                //刷新工厂类型，希望不刷新。若刷新了，则打印错误信息到cerr
-//                if (this->allFactories_[factory_index]->SetType(static_cast<FactoryType>(factoryType_cache))){
-//                    std::cerr << "FactoryID: " << factory_index << " has CHANGED TYPE!!!" << std::endl;
-//                }
-//                //刷新其他信息
-//                if (!(this->allFactories_[factory_index]->SetRemainingFrame(remainingFrame_cache))){
-//                    std::cerr << "FactoryID: " << factory_index << " SetRemainingFrame FAILED" << std::endl;
-//                }
-//                if (!(this->allFactories_[factory_index]->SetWarehouseStatus(warehouseStatus_cache))){
-//                    std::cerr << "FactoryID: " << factory_index << " SetWarehouseStatus FAILED!!!" << std::endl;
-//                }
-//                if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))){
-//                    std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
-//                }
-//                isUpdate = true;
-//                break; //找到对应的工厂，且状态更新结束
-//            }
-//        }
-
-//        if (!isUpdate){
-//            std::cerr << "Factory Coordinate (" << factory_x_input << ", " << factory_y_input << ") NOT FOUND !!!" << std::endl;
-//        }
     }
 
     int nearbyFactoryID_cahce; //-1：表示当前没有处于任何工作台附近   [0,工作台总数-1] ：表示某工作台的下标，从0开始，按输入顺序定。当前机器人的所有购买、出售行为均针对该工作台进行。
@@ -535,6 +507,9 @@ float Context::GetDt() const {
 void Context::FactoriesClassification() {
     for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
         FactoryType current_type = this->allFactories_[factory_index]->GetFactoryType();
+        std::set<FactoryType> warehouseType;
+        std::map<FactoryType, bool> warehouseState;
+
         switch (current_type) {
             case FactoryType::UNKNOWN:
                 std::cerr << "Factory NO." << this->allFactories_[factory_index]->GetFactoryId() << "type is UNKNOWN!!!" << std::endl;
@@ -546,6 +521,9 @@ void Context::FactoriesClassification() {
                 this->oneFactoriesIndex_.push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_4][MATERIAL_1].push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_5][MATERIAL_1].push_back(factory_index);
+
+                warehouseType.insert(UNKNOWN);
+                warehouseState[UNKNOWN] = false;
                 break;
             case FactoryType::MATERIAL_2:
                 twoFactories_.push_back(this->allFactories_[factory_index]);
@@ -553,6 +531,9 @@ void Context::FactoriesClassification() {
                 this->twoFactoriesIndex_.push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_4][MATERIAL_2].push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_6][MATERIAL_2].push_back(factory_index);
+
+                warehouseType.insert(UNKNOWN);
+                warehouseState[UNKNOWN] = false;
                 break;
             case FactoryType::MATERIAL_3:
                 threeFactories_.push_back(this->allFactories_[factory_index]);
@@ -560,6 +541,10 @@ void Context::FactoriesClassification() {
                 this->threeFactoriesIndex_.push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_5][MATERIAL_3].push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_6][MATERIAL_3].push_back(factory_index);
+                this->allFactories_[factory_index]->SetWarehouseState(UNKNOWN, false);
+
+                warehouseType.insert(UNKNOWN);
+                warehouseState[UNKNOWN] = false;
                 break;
 
             case FactoryType::FACTORY_4:
@@ -567,24 +552,39 @@ void Context::FactoriesClassification() {
                 this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
                 this->fourFactoriesIndex_.push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_7][FACTORY_4].push_back(factory_index);
-                // 先不考虑456卖到9
-//                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+                // 先不考虑456卖到9?
+                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+
+                warehouseType.insert(MATERIAL_1);
+                warehouseState[MATERIAL_1] = false;
+                warehouseType.insert(MATERIAL_2);
+                warehouseState[MATERIAL_2] = false;
                 break;
             case FactoryType::FACTORY_5:
                 fiveFactories_.push_back(this->allFactories_[factory_index]);
                 this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
                 this->fiveFactoriesIndex_.push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_7][FACTORY_5].push_back(factory_index);
-                // 先不考虑456卖到9
-//                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+                // 先不考虑456卖到9?
+                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+
+                warehouseType.insert(MATERIAL_1);
+                warehouseState[MATERIAL_1] = false;
+                warehouseType.insert(MATERIAL_3);
+                warehouseState[MATERIAL_3] = false;
                 break;
             case FactoryType::FACTORY_6:
                 sixFactories_.push_back(this->allFactories_[factory_index]);
                 this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
                 this->sixFactoriesIndex_.push_back(factory_index);
                 this->globalFactoryMap_[FACTORY_7][FACTORY_6].push_back(factory_index);
-                // 先不考虑456卖到9
-//                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+                // 先不考虑456卖到9?
+                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+
+                warehouseType.insert(MATERIAL_2);
+                warehouseState[MATERIAL_2] = false;
+                warehouseType.insert(MATERIAL_3);
+                warehouseState[MATERIAL_3] = false;
                 break;
 
             case FactoryType::FACTORY_7:
@@ -593,31 +593,63 @@ void Context::FactoriesClassification() {
                 this->sevenFactoriesIndex_.push_back(factory_index);
                 this->globalFactoryMap_[SELLER_8][FACTORY_7].push_back(factory_index);
                 this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
+
+                warehouseType.insert(FACTORY_4);
+                warehouseState[FACTORY_4] = false;
+                warehouseType.insert(FACTORY_5);
+                warehouseState[FACTORY_5] = false;
+                warehouseType.insert(FACTORY_6);
+                warehouseState[FACTORY_6] = false;
                 break;
 
             case FactoryType::SELLER_8:
                 eightFactories_.push_back(this->allFactories_[factory_index]);
                 this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::D);
                 this->eightFactoriesIndex_.push_back(factory_index);
+
+                warehouseType.insert(FACTORY_7);
+                warehouseState[FACTORY_7] = false;
                 break;
             case FactoryType::SELLER_9:
                 nineFactories_.push_back(this->allFactories_[factory_index]);
                 this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::D);
                 this->nineFactoriesIndex_.push_back(factory_index);
+
+                warehouseType.insert(FACTORY_4);
+                warehouseState[FACTORY_4] = false;
+                warehouseType.insert(FACTORY_5);
+                warehouseState[FACTORY_5] = false;
+                warehouseType.insert(FACTORY_6);
+                warehouseState[FACTORY_6] = false;
+                warehouseType.insert(FACTORY_7);
+                warehouseState[FACTORY_7] = false;
                 break;
         }
+        this->allFactories_[factory_index]->SetWarehouseType(warehouseType);
+        this->allFactories_[factory_index]->SetWarehouseState(warehouseState);
+
+//        //打印检查warehouseType和warehouseState
+//        std::cerr << "Factory NO." << this->GetFactory(factory_index)->GetFactoryId()
+//        << " Factory type: " << this->GetFactory(factory_index)->GetFactoryType() << "\twarehouseType_: ";
+//        for (auto it : this->GetFactory(factory_index)->GetWarehouseType()) {
+//            std::cerr << it << " ";
+//        }
+//        std::cerr << "\t";
+//        auto myMap = this->GetFactory(factory_index)->GetWarehouseState();
+//        for (auto it: myMap)
+//        {
+//            std::cerr << "Key: " << it.first << ", Value: " << it.second << " ";
+//        }
+//        std::cerr << std::endl;
     }
-
-
-//    for (auto &item : this->oneFactories_) { // 潜在bug？
-//        std::cerr << item->GetFactoryId() << " ";
-//    }
-//    std::cerr << std::endl;
-
 }
 
+std::map<FactoryType, bool> Context::WarehouseStateConversion(int rawInfo){
+    //TODO: 给一个原始仓库信息，返回一个std::map<FactoryType, bool> warehouseState
+    std::map<FactoryType, bool> warehouseState;
 
-
+    return warehouseState;
+};
 
 
 

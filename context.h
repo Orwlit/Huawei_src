@@ -21,6 +21,7 @@ public:
     bool GenerateHistoryGraph();
     void FactoriesClassification();
 
+    static std::map<FactoryType, bool> WarehouseStateConversion(int raw_info);
 
     //Distance between Factories or Robots
     [[nodiscard]] float DistanceFF(int factory1_ID, int factory2_ID) const;
