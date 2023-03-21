@@ -8,26 +8,6 @@
 Factory::Factory() {
     this->factoryType_ = FactoryType::UNKNOWN;
 
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[2] = 1;
-    this->warehouseMap_[4] = 2;
-    this->warehouseMap_[8] = 3;
-    this->warehouseMap_[7] = 12;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
-    this->warehouseMap_[0] = 0;
 }
 
 bool Factory::SetType(FactoryType type) {

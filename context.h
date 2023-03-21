@@ -28,9 +28,9 @@ public:
     void PrintHistoryMap() const;
 
     //Distance between Factories or Robots
-    [[nodiscard]] float DistanceFF(int factory1_ID, int factory2_ID) const;
-    [[nodiscard]] float DistanceFR(int robotID, int factoryID) const;
-    [[nodiscard]] float DistanceRR(int robot1_ID, int robot2_ID) const;
+    [[nodiscard]] double DistanceFF(int factory1_ID, int factory2_ID) const;
+    [[nodiscard]] double DistanceFR(int robotID, int factoryID) const;
+    [[nodiscard]] double DistanceRR(int robot1_ID, int robot2_ID) const;
 
     //防撞策略
     [[nodiscard]] bool AboutToCrash(const std::shared_ptr<Robot> &robot1, const std::shared_ptr<Robot> &robot2, float k) const;
@@ -77,8 +77,7 @@ private:
     std::vector<int> eightFactoriesIndex_;
     std::vector<int> nineFactoriesIndex_;
 
-    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryTypeMap_;
-    //按工厂类型的索引，例如FACTORY_4到MATERIAL_1的全部工厂ID
+    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryTypeMap_; //按工厂类型的索引，例如FACTORY_4到MATERIAL_1的全部工厂ID
     std::vector<int> routeRobotSeller_; //机器人到卖家的最短距离，第一个值为机器人ID，后面是路线上的工厂ID
 
     std::vector<std::vector<double>> initialHistoryGraph_;

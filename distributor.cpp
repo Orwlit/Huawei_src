@@ -11,6 +11,7 @@ Distributor::Distributor() {
     std::shared_ptr<Context> sharedPtr = std::make_shared<Context>();
     this->context = sharedPtr;
     this->nodeTotalNum_ = this->context->GetNodeTotalNum();
+    this->factoryIDShift_ = this->context->GetRobotTotalNum();
 
     this->historyGraph_ = DeepCopy2DVector(this->context->GetInitialHistoryGraph());
 
@@ -24,15 +25,8 @@ bool Distributor::run() {
         std::cout << this->context->GetFrameId() << std::endl;
 
 
-
-//        if (this->context->GetRobot(0)->GetLinearVelocity() < 0.1){
-//            std::cerr << "Robot 0 STOPPED!!!" << std::endl;
-//        }
-//        if (this->context->GetRobot(1)->GetLinearVelocity() < 0.1){
-//            std::cerr << "Robot 1 STOPPED!!!" << std::endl;
-//        }
-//        this->context->GetRobot(2)->HighSpeedMove(25.0f, 25.0f, this->context->GetDt());
-//        this->context->GetRobot(3)->HighSpeedMove(25.0f, 25.0f, this->context->GetDt());
+        this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
+        this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
 
 
 //        if (!(this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(1), 8.5))){
@@ -40,23 +34,25 @@ bool Distributor::run() {
 //        }
 
         std::cerr << "Frame ID: " << this->context->GetFrameId() << std::endl;
-        bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(3), 15);
-        if (aboutToCrash){
-            this->context->GetRobot(0)->Rotate(M_PI);
-            this->context->GetRobot(3)->Rotate(M_PI);
-        }else {
-            this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
-            this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
+//        bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(3), 15);
+//        if (aboutToCrash){
+//            this->context->GetRobot(0)->Rotate(M_PI);
+//            this->context->GetRobot(3)->Rotate(M_PI);
+//        }else {
+//            this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
+//            this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
+
+        // 两两检查是否相撞，共6次
+        for (int i = 0; i < 4; ++i) {
+            for (int j = i + 1; j < 4; ++j) {
+                bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(i), this->context->GetRobot(j), 18);
+                if (aboutToCrash){
+                    this->context->GetRobot(i)->Rotate(M_PI);
+                    this->context->GetRobot(j)->Rotate(M_PI);
+//                    this->context->GetRobot(i)->Forward(0);
+                }
+            }
         }
-//        for (int i = 0; i < 4; ++i) {
-//            for (int j = 0; j < 4; ++j) {
-//                bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(i), this->context->GetRobot(j), 9);
-//                if (aboutToCrash){
-//                    this->context->GetRobot(i)->Rotate(M_PI/2);
-//                    this->context->GetRobot(j)->Rotate(M_PI/2);
-//                }
-//            }
-//        }
 
         //与控制台交互结束
         std::cout << "OK" << std::flush;
@@ -221,4 +217,75 @@ std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector
         }
     }
     return copy;
+}
+
+void Distributor::UpdateFromBroadcast() {
+
+}
+
+void Distributor::RFBroadcastUpdate(int robot_index, int factory_index) {
+    // 无：0，有：1
+    int product_state = this->context->GetFactory(factory_index)->GetProductState();
+    if (product_state == 1){
+        double robot_x = this->context->GetRobot(robot_index)->GetCoordinate()[0];
+        double robot_y = this->context->GetRobot(robot_index)->GetCoordinate()[1];
+        double factory_x = this->context->GetFactory(robot_index)->GetCoordinate()[0];
+        double factory_y = this->context->GetFactory(robot_index)->GetCoordinate()[1];
+        double distance = sqrt(pow(factory_x - robot_x, 2) + pow(factory_y - robot_y, 2));
+
+        // 是否需要保存历史数据???
+//        this->historyGraph_[robot_index][factory_index + this->factoryIDShift_] = this->globalGraph_[robot_index][factory_index + this->factoryIDShift_];
+//        this->historyGraph_[factory_index + this->factoryIDShift_][robot_index] = this->globalGraph_[factory_index + this->factoryIDShift_][robot_index];
+        // 更新权值
+        this->globalGraph_[robot_index][factory_index + this->factoryIDShift_] = distance;
+        this->globalGraph_[factory_index + this->factoryIDShift_][robot_index] = distance;
+    } else if (product_state == 0){
+        // 保存历史数据
+        this->historyGraph_[robot_index][factory_index + this->factoryIDShift_] = this->globalGraph_[robot_index][factory_index + this->factoryIDShift_];
+        this->historyGraph_[factory_index + this->factoryIDShift_][robot_index] = this->globalGraph_[factory_index + this->factoryIDShift_][robot_index];
+        // 更新权值
+        this->globalGraph_[robot_index][factory_index + this->factoryIDShift_] = this->INFINITE_;
+        this->globalGraph_[factory_index + this->factoryIDShift_][robot_index] = this->INFINITE_;
+    }
+}
+
+void Distributor::FFBroadcastUpdate(int up_index, int down_index) {
+    for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
+        FactoryClass current_class = this->context->GetFactory(factory_index)->GetFactoryClass();
+        // 对4567类型工厂的仓库状态循环
+        if (current_class == FactoryClass::B || current_class == FactoryClass::C){
+            auto warehouse_state = this->context->GetFactory(factory_index)->GetWarehouseState();
+            for (auto warehouse_type : this->context->GetFactory(factory_index)->GetWarehouseType()) {
+                if (warehouse_state[warehouse_type]){ // 仓库状态为true，代表有货物，即为没有需求
+                    //TODO: 根据是否在生产决定权值
+                } else {
+                    //TODO: 有需求，负无穷
+                }
+            }
+        }
+    }
+
+
+    FactoryType up_type = this->context->GetFactory(up_index)->GetFactoryType();
+    FactoryType down_type = this->context->GetFactory(down_index)->GetFactoryType();
+    auto down_warehouse_state = this->context->GetFactory(down_index)->GetWarehouseState();
+    auto down_warehouse_type = this->context->GetFactory(down_index)->GetWarehouseType();
+    FactoryFlag down_demand;
+
+
+}
+
+void Distributor::PreserveAndUpdateInfo(int u, int v, double value) {
+    double preserve = this->globalGraph_[u][v];
+    this->historyGraph_[u][v] = preserve;
+    this->historyGraph_[v][u] = preserve;
+
+    this->globalGraph_[u][v] = value;
+    this->globalGraph_[v][u] = value;
+}
+
+void Distributor::ExtractInfo(int u, int v) {
+    double value = this->historyGraph_[u][v];
+    this->globalGraph_[u][v] = value;
+    this->globalGraph_[v][u] = value;
 }

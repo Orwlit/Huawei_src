@@ -33,12 +33,19 @@ public:
     Distributor();
 
     //Basic Function
-    bool MaintainGraph(); //从context中维护图结构
     std::pair<double, std::vector<int>> BellmanFordRoute(int src, int target);
     std::vector<double> BellmanFordDistance(std::vector<std::vector<int>>& graph, int V, int src, int target);
+    void PreserveAndUpdateInfo(int u, int v, double value); // 将u，v坐标的数据保存到历史地图
+    void ExtractInfo(int u, int v); // 将u，v坐标的数据从历史地图读出
 
-    //全局图优化，利用A层到D层最短距离，结合机器人距离派发任务。(A层：123；B层：456；C层：7；D层：89)
-    bool GraphOptimization();
+    // 分配逻辑
+    bool GraphOptimization(); // 全局图优化，利用A层到D层最短距离，结合机器人距离派发任务。(A层：123；B层：456；C层：7；D层：89)
+    void UpdateFromBroadcast(); // 通过每帧信息更新权值
+    void UpdateFromPlanning(); // 根据机器人寻路更新权值
+    void UpdateFromTask(); // 根据分配任务情况更新权值
+
+    void FFBroadcastUpdate(int up_index, int down_index);// 工厂广播更新
+    void RFBroadcastUpdate(int robot_index, int factory_index);// 机器人广播更新，根据传入的机器人编号和工厂编号，对工厂是否有产品更新权值
 
     //Tasks
     void DistributeTask(std::vector<int> route);
@@ -55,6 +62,7 @@ private:
     std::map<int, std::map<FactoryType, std::vector<double*>>> idTypeEdge_; // 依次按工厂id、工厂类型type进行索引，返回这个id的工厂对应所有type类型的权值指针
 
     int nodeTotalNum_;
+    int factoryIDShift_;
 
     const double DISCONNECT_ = 0.0;
     const double INFINITE_ = 999.0; // 表示无穷大

@@ -511,31 +511,31 @@ void Context::SetPreviousFrameId(int previousFrameId) {
     previousFrameID_ = previousFrameId;
 }
 
-float Context::DistanceFR(int robotID, int factoryID) const {
+double Context::DistanceFR(int robotID, int factoryID) const {
     float robot_x = this->GetRobot(robotID)->GetCoordinate()[0];
     float robot_y = this->GetRobot(robotID)->GetCoordinate()[1];
     float factory_x = this->GetFactory(factoryID)->GetCoordinate()[0];
     float factory_y = this->GetFactory(factoryID)->GetCoordinate()[1];
     double distance = sqrt(pow(factory_x - robot_x, 2) + pow(factory_y - robot_y, 2));
-    return static_cast<float>(distance);
+    return distance;
 }
 
-float Context::DistanceFF(int factory1_ID, int factory2_ID) const {
+double Context::DistanceFF(int factory1_ID, int factory2_ID) const {
     float factory1_x = this->GetFactory(factory1_ID)->GetCoordinate()[0];
     float factory1_y = this->GetFactory(factory1_ID)->GetCoordinate()[1];
     float factory2_x = this->GetFactory(factory2_ID)->GetCoordinate()[0];
     float factory2_y = this->GetFactory(factory2_ID)->GetCoordinate()[1];
     double distance = sqrt(pow(factory2_x - factory1_x, 2) + pow(factory2_y - factory1_y, 2));
-    return static_cast<float>(distance);
+    return distance;
 }
 
-float Context::DistanceRR(int robot1_ID, int robot2_ID) const {
+double Context::DistanceRR(int robot1_ID, int robot2_ID) const {
     float robot1_x = this->GetRobot(robot1_ID)->GetCoordinate()[0];
     float robot1_y = this->GetRobot(robot1_ID)->GetCoordinate()[1];
     float robot2_x = this->GetRobot(robot2_ID)->GetCoordinate()[0];
     float robot2_y = this->GetRobot(robot2_ID)->GetCoordinate()[1];
     double distance = sqrt(pow(robot2_x - robot1_x, 2) + pow(robot2_y - robot1_y, 2));
-    return static_cast<float>(distance);
+    return distance;
 }
 
 std::shared_ptr<Robot> Context::GetRobot(int robotIndex) const {

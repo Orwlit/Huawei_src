@@ -160,6 +160,7 @@ bool Robot::Sell(int factoryID) const{
         return false;
     }
     std::cout << "sell" << " " << robotID_ << std::endl;
+
     return true;
 };
 
@@ -175,12 +176,13 @@ bool Robot::SetNearbyFactoryID(int nearbyFactory) {
 
 bool Robot::SetCarryingType(int carryingType) {
     this->carryingType_ = carryingType;
-    if (carryingType == 0){
-        this->flag_ = ROBOT_READY;
-    }
-    else{
-        this->flag_ = ROBOT_BUSY;
-    }
+    //
+//    if (carryingType == 0){
+//        this->flag_ = ROBOT_READY;
+//    }
+//    else{
+//        this->flag_ = ROBOT_BUSY;
+//    }
     return true;
 }
 
@@ -207,9 +209,15 @@ bool Robot::SetLinearVelocity(float linearVelocity_x, float linearVelocity_y) {
 //        return false;
 //    }
     double linear_velocity = sqrt(pow(linearVelocity_x, 2) + pow(linearVelocity_y, 2));
+    double velocity_theta = atan2(linearVelocity_y, linearVelocity_x);
+//    if ((velocity_theta * this->orientation_) < 0){
+//        this->linearVelocity_ = -1.0f * static_cast<float>(linear_velocity);
+//    }else{
+    this->linearVelocity_ = static_cast<float>(linear_velocity); //TODO: 没考虑倒车
+//    }
     this->linearVelocity_x_ = linearVelocity_x;
     this->linearVelocity_y_ = linearVelocity_y;
-    this->linearVelocity_ = static_cast<float>(linear_velocity); //TODO: 没考虑倒车
+//    std::cerr << "车速度：" << this->linearVelocity_ << std::endl;
     return true;
 }
 
@@ -318,7 +326,7 @@ float Robot::GetLinearVelocityY() const {
 }
 
 void Robot::SetFlag(RobotFlag flag) {
-    Robot::flag_ = flag;
+    this->flag_ = flag;
 }
 
 

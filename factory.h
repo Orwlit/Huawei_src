@@ -36,8 +36,6 @@ enum FactoryFlag{
 
 class Factory{
 private:
-    std::map<int, int> warehouseMap_;
-
     int factoryID_;
     FactoryType factoryType_;
     FactoryClass factoryClass_;
