@@ -1,12 +1,6 @@
 //
 // Created by orw on 3/14/23.
 //
-#include <iostream>
-#include <vector>
-#include <map>
-#include <cmath>
-#include <memory>
-
 #include "context.h"
 
 Context::Context() {
@@ -28,7 +22,8 @@ Context::Context() {
         std::cerr << "Initialization Failed" << std::endl;
     }
     std::cerr << "Initialization complete" << std::endl;
-    this->GenerateHistoryGraph();
+
+//    this->GenerateHistoryGraph();
 }
 
 bool Context::UpdateAllStatus() {
@@ -72,6 +67,7 @@ bool Context::UpdateAllStatus() {
             std::cerr << "factoryType: " << factoryType_cache << std::endl;
             return false;
         }
+//        std::cerr << factoryType_cache << std::endl;
 //        std::cerr << "factoryType: " << factoryType_cache << std::endl;
 
         std::cin >> factory_x_input >> factory_y_input;
@@ -252,7 +248,149 @@ bool Context::Initialize() {
                 this->allFactories_.push_back(std::make_shared<Factory>(factoryID, factoryType, x, y));
 //                std::cerr << "factoryID: " << factoryID << " Created, x: " << x << " y: " << y << std::endl;
 
-                this->allFactories_[factoryID];
+                // 初始化工厂类型
+                this->allFactories_[factoryID]->SetType(factoryType);
+
+                // 初始化仓库状态
+                std::set<FactoryType> warehouseType;
+                std::map<FactoryType, bool> warehouseState;
+                int factory_index_shift = this->GetRobotTotalNum();
+                switch (factoryType) {
+                    case FactoryType::UNKNOWN:
+                        std::cerr << "Factory NO." << this->allFactories_[factoryID]->GetFactoryId() << "type is UNKNOWN!!!" << std::endl;
+                        break;
+
+                    case FactoryType::MATERIAL_1:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::A);
+                        oneFactories_.push_back(this->allFactories_[factoryID]);
+                        this->oneFactoriesIndex_.push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_4][MATERIAL_1].push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_5][MATERIAL_1].push_back(factoryID);
+
+                        warehouseType.insert(UNKNOWN);
+                        warehouseState[UNKNOWN] = false;
+                        break;
+                    case FactoryType::MATERIAL_2:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::A);
+                        twoFactories_.push_back(this->allFactories_[factoryID]);
+                        this->twoFactoriesIndex_.push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_4][MATERIAL_2].push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_6][MATERIAL_2].push_back(factoryID);
+
+                        warehouseType.insert(UNKNOWN);
+                        warehouseState[UNKNOWN] = false;
+                        break;
+                    case FactoryType::MATERIAL_3:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::A);
+                        threeFactories_.push_back(this->allFactories_[factoryID]);
+                        this->threeFactoriesIndex_.push_back(factoryID);
+//                        this->globalFactoryTypeMap_[FACTORY_5][MATERIAL_3].push_back(factoryID);
+//                        this->globalFactoryTypeMap_[FACTORY_6][MATERIAL_3].push_back(factoryID);
+                        this->allFactories_[factoryID]->SetWarehouseState(UNKNOWN, false);
+
+                        warehouseType.insert(UNKNOWN);
+                        warehouseState[UNKNOWN] = false;
+                        break;
+
+                    case FactoryType::FACTORY_4:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::B);
+                        fourFactories_.push_back(this->allFactories_[factoryID]);
+                        this->fourFactoriesIndex_.push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_7][FACTORY_4].push_back(factoryID);
+                        // 先不考虑456卖到9?
+                        this->globalFactoryTypeMap_[SELLER_9][FACTORY_4].push_back(factoryID);
+
+                        warehouseType.insert(MATERIAL_1);
+                        warehouseState[MATERIAL_1] = false;
+                        warehouseType.insert(MATERIAL_2);
+                        warehouseState[MATERIAL_2] = false;
+                        break;
+                    case FactoryType::FACTORY_5:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::B);
+                        fiveFactories_.push_back(this->allFactories_[factoryID]);
+                        this->fiveFactoriesIndex_.push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_7][FACTORY_5].push_back(factoryID);
+                        // 先不考虑456卖到9?
+                        this->globalFactoryTypeMap_[SELLER_9][FACTORY_5].push_back(factoryID);
+
+                        warehouseType.insert(MATERIAL_1);
+                        warehouseState[MATERIAL_1] = false;
+                        warehouseType.insert(MATERIAL_3);
+                        warehouseState[MATERIAL_3] = false;
+                        break;
+                    case FactoryType::FACTORY_6:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::B);
+                        sixFactories_.push_back(this->allFactories_[factoryID]);
+                        this->sixFactoriesIndex_.push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_7][FACTORY_6].push_back(factoryID);
+                        // 先不考虑456卖到9?
+                        this->globalFactoryTypeMap_[SELLER_9][FACTORY_6].push_back(factoryID);
+
+                        warehouseType.insert(MATERIAL_2);
+                        warehouseState[MATERIAL_2] = false;
+                        warehouseType.insert(MATERIAL_3);
+                        warehouseState[MATERIAL_3] = false;
+                        break;
+
+                    case FactoryType::FACTORY_7:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::C);
+                        sevenFactories_.push_back(this->allFactories_[factoryID]);
+                        this->sevenFactoriesIndex_.push_back(factoryID);
+                        this->globalFactoryTypeMap_[SELLER_8][FACTORY_7].push_back(factoryID);
+                        this->globalFactoryTypeMap_[SELLER_9][FACTORY_7].push_back(factoryID);
+
+                        warehouseType.insert(FACTORY_4);
+                        warehouseState[FACTORY_4] = false;
+                        warehouseType.insert(FACTORY_5);
+                        warehouseState[FACTORY_5] = false;
+                        warehouseType.insert(FACTORY_6);
+                        warehouseState[FACTORY_6] = false;
+                        break;
+
+                    case FactoryType::SELLER_8:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::D);
+                        eightFactories_.push_back(this->allFactories_[factoryID]);
+                        this->eightFactoriesIndex_.push_back(factoryID);
+
+                        warehouseType.insert(FACTORY_7);
+                        warehouseState[FACTORY_7] = false;
+                        break;
+                    case FactoryType::SELLER_9:
+                        this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::D);
+                        nineFactories_.push_back(this->allFactories_[factoryID]);
+                        this->nineFactoriesIndex_.push_back(factoryID);
+
+                        warehouseType.insert(FACTORY_4);
+                        warehouseState[FACTORY_4] = false;
+                        warehouseType.insert(FACTORY_5);
+                        warehouseState[FACTORY_5] = false;
+                        warehouseType.insert(FACTORY_6);
+                        warehouseState[FACTORY_6] = false;
+                        warehouseType.insert(FACTORY_7);
+                        warehouseState[FACTORY_7] = false;
+                        break;
+                }
+                this->allFactories_[factoryID]->SetWarehouseType(warehouseType);
+                this->allFactories_[factoryID]->SetWarehouseState(warehouseState);
+
+
+//                //打印检查warehouseType和warehouseState
+//                std::cerr << "Factory NO." << this->GetFactory(factoryID)->GetFactoryId()
+//                          << " Factory type: " << this->GetFactory(factoryID)->GetFactoryType() << "\twarehouseType_: ";
+//                for (auto it : this->GetFactory(factoryID)->GetWarehouseType()) {
+//                    std::cerr << it << " ";
+//                }
+//                std::cerr << "\t";
+//                auto myMap = this->GetFactory(factoryID)->GetWarehouseState();
+//                for (auto it: myMap)
+//                {
+//                    std::cerr << "Key: " << it.first << ", Value: " << it.second << " ";
+//                }
+//                std::cerr << std::endl;
+
+
+
+
                 ++factoryID;
                 continue;
             }
@@ -260,6 +398,18 @@ bool Context::Initialize() {
     }
 
     this->factoryTotalNum_ = factoryID;
+
+    // 检查globalFactoryTypeMap_，打印信息
+    for (auto from : this->globalFactoryTypeMap_){
+        for (auto to : from.second) {
+            std::cerr << "All index of FactoryType: " << from.first << " to ";
+            std::cerr << to.first << " is: ";
+            for (auto index : to.second) {
+                std::cerr << index << " ";
+            }
+            std::cerr << std::endl;
+        }
+    }
 
     //读取OK，判断信息结束
     std::string ok_get;
@@ -270,7 +420,6 @@ bool Context::Initialize() {
     return true;
 }
 
-// 创建历史图，注意：此时不知道各个工厂的类型
 bool Context::GenerateHistoryGraph() {
     // 初始全置为无穷大
     std::vector<double> infinite_vector;
@@ -305,7 +454,6 @@ bool Context::GenerateHistoryGraph() {
     for (int factory_from_index = 0; factory_from_index < this->factoryTotalNum_; ++factory_from_index) {
         double factory_from_x = this->GetFactory(factory_from_index)->GetCoordinate()[0];
         double factory_from_y = this->GetFactory(factory_from_index)->GetCoordinate()[1];
-        FactoryClass factory_from_class = this->GetFactory(factory_from_index)->GetFactoryClass();
         FactoryType factory_from_type = this->GetFactory(factory_from_index)->GetFactoryType();
 
 
@@ -502,140 +650,9 @@ float Context::GetDt() const {
 void Context::FactoriesClassification() {
     for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
         FactoryType current_type = this->allFactories_[factory_index]->GetFactoryType();
-        std::set<FactoryType> warehouseType;
-        std::map<FactoryType, bool> warehouseState;
 
-        switch (current_type) {
-            case FactoryType::UNKNOWN:
-                std::cerr << "Factory NO." << this->allFactories_[factory_index]->GetFactoryId() << "type is UNKNOWN!!!" << std::endl;
-                break;
 
-            case FactoryType::MATERIAL_1:
-                oneFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::A);
-                this->oneFactoriesIndex_.push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_4][MATERIAL_1].push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_5][MATERIAL_1].push_back(factory_index);
 
-                warehouseType.insert(UNKNOWN);
-                warehouseState[UNKNOWN] = false;
-                break;
-            case FactoryType::MATERIAL_2:
-                twoFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::A);
-                this->twoFactoriesIndex_.push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_4][MATERIAL_2].push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_6][MATERIAL_2].push_back(factory_index);
-
-                warehouseType.insert(UNKNOWN);
-                warehouseState[UNKNOWN] = false;
-                break;
-            case FactoryType::MATERIAL_3:
-                threeFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::A);
-                this->threeFactoriesIndex_.push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_5][MATERIAL_3].push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_6][MATERIAL_3].push_back(factory_index);
-                this->allFactories_[factory_index]->SetWarehouseState(UNKNOWN, false);
-
-                warehouseType.insert(UNKNOWN);
-                warehouseState[UNKNOWN] = false;
-                break;
-
-            case FactoryType::FACTORY_4:
-                fourFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
-                this->fourFactoriesIndex_.push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_7][FACTORY_4].push_back(factory_index);
-                // 先不考虑456卖到9?
-                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
-
-                warehouseType.insert(MATERIAL_1);
-                warehouseState[MATERIAL_1] = false;
-                warehouseType.insert(MATERIAL_2);
-                warehouseState[MATERIAL_2] = false;
-                break;
-            case FactoryType::FACTORY_5:
-                fiveFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
-                this->fiveFactoriesIndex_.push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_7][FACTORY_5].push_back(factory_index);
-                // 先不考虑456卖到9?
-                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
-
-                warehouseType.insert(MATERIAL_1);
-                warehouseState[MATERIAL_1] = false;
-                warehouseType.insert(MATERIAL_3);
-                warehouseState[MATERIAL_3] = false;
-                break;
-            case FactoryType::FACTORY_6:
-                sixFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::B);
-                this->sixFactoriesIndex_.push_back(factory_index);
-                this->globalFactoryMap_[FACTORY_7][FACTORY_6].push_back(factory_index);
-                // 先不考虑456卖到9?
-                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
-
-                warehouseType.insert(MATERIAL_2);
-                warehouseState[MATERIAL_2] = false;
-                warehouseType.insert(MATERIAL_3);
-                warehouseState[MATERIAL_3] = false;
-                break;
-
-            case FactoryType::FACTORY_7:
-                sevenFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::C);
-                this->sevenFactoriesIndex_.push_back(factory_index);
-                this->globalFactoryMap_[SELLER_8][FACTORY_7].push_back(factory_index);
-                this->globalFactoryMap_[SELLER_9][FACTORY_7].push_back(factory_index);
-
-                warehouseType.insert(FACTORY_4);
-                warehouseState[FACTORY_4] = false;
-                warehouseType.insert(FACTORY_5);
-                warehouseState[FACTORY_5] = false;
-                warehouseType.insert(FACTORY_6);
-                warehouseState[FACTORY_6] = false;
-                break;
-
-            case FactoryType::SELLER_8:
-                eightFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::D);
-                this->eightFactoriesIndex_.push_back(factory_index);
-
-                warehouseType.insert(FACTORY_7);
-                warehouseState[FACTORY_7] = false;
-                break;
-            case FactoryType::SELLER_9:
-                nineFactories_.push_back(this->allFactories_[factory_index]);
-                this->allFactories_[factory_index]->SetFactoryClass(FactoryClass::D);
-                this->nineFactoriesIndex_.push_back(factory_index);
-
-                warehouseType.insert(FACTORY_4);
-                warehouseState[FACTORY_4] = false;
-                warehouseType.insert(FACTORY_5);
-                warehouseState[FACTORY_5] = false;
-                warehouseType.insert(FACTORY_6);
-                warehouseState[FACTORY_6] = false;
-                warehouseType.insert(FACTORY_7);
-                warehouseState[FACTORY_7] = false;
-                break;
-        }
-        this->allFactories_[factory_index]->SetWarehouseType(warehouseType);
-        this->allFactories_[factory_index]->SetWarehouseState(warehouseState);
-
-//        //打印检查warehouseType和warehouseState
-//        std::cerr << "Factory NO." << this->GetFactory(factory_index)->GetFactoryId()
-//        << " Factory type: " << this->GetFactory(factory_index)->GetFactoryType() << "\twarehouseType_: ";
-//        for (auto it : this->GetFactory(factory_index)->GetWarehouseType()) {
-//            std::cerr << it << " ";
-//        }
-//        std::cerr << "\t";
-//        auto myMap = this->GetFactory(factory_index)->GetWarehouseState();
-//        for (auto it: myMap)
-//        {
-//            std::cerr << "Key: " << it.first << ", Value: " << it.second << " ";
-//        }
-//        std::cerr << std::endl;
     }
 }
 
@@ -654,48 +671,46 @@ inline std::vector<int> get_the_one_position(int num)
 }
 
 std::map<FactoryType, bool> Context::WarehouseStateConversion(FactoryType type, int rawInfo){
-    //TODO: 给一个原始仓库信息，返回一个std::map<FactoryType, bool> warehouseState
-    std::map<FactoryType, bool> warehouseState;
     std::vector<int> onePositions = get_the_one_position(rawInfo);
     std::map<FactoryType, bool> res_;
     if (type == FACTORY_4) 
     {
-        res_.at(MATERIAL_1) = false;
-        res_.at(MATERIAL_2) = false;
+        res_[MATERIAL_1] = false;
+        res_[MATERIAL_2] = false;
         for(auto pos : onePositions)
         {
-            res_.at(static_cast<FactoryType>(pos)) = true;
+            res_[static_cast<FactoryType>(pos)] = true;
         }
     }
     else if (type == FACTORY_5) 
     {
-        res_.at(MATERIAL_1) = false;
-        res_.at(MATERIAL_3) = false;
+        res_[MATERIAL_1] = false;
+        res_[MATERIAL_3] = false;
         for(auto pos : onePositions)
         {
-            res_.at(static_cast<FactoryType>(pos)) = true;
+            res_[static_cast<FactoryType>(pos)] = true;
         }
     }
     else if (type == FACTORY_6) 
     {
-        res_.at(MATERIAL_2) = false;
-        res_.at(MATERIAL_3) = false;
+        res_[MATERIAL_2] = false;
+        res_[MATERIAL_3] = false;
         for(auto pos : onePositions)
         {
-            res_.at(static_cast<FactoryType>(pos)) = true;
+            res_[static_cast<FactoryType>(pos)] = true;
         }
     }
     else if (type == FACTORY_7)
     {
-        res_.at(FACTORY_4) = false;
-        res_.at(FACTORY_5) = false;
-        res_.at(FACTORY_6) = false;
+        res_[FACTORY_4] = false;
+        res_[FACTORY_5] = false;
+        res_[FACTORY_6] = false;
         for(auto pos : onePositions)
         {
-            res_.at(static_cast<FactoryType>(pos)) = true;
+            res_[static_cast<FactoryType>(pos)] = true;
         }
     }
-    return warehouseState;
+    return res_;
 }
 
 
