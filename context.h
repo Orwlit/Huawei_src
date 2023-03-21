@@ -67,9 +67,9 @@ private:
     std::vector<int> sevenFactoriesIndex_;
     std::vector<int> eightFactoriesIndex_;
     std::vector<int> nineFactoriesIndex_;
-//    std::vector<std::vector<std::vector<FactoryType>>> globalFactoryMap_;
-    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryMap_;
 
+    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryMap_; //按工厂类型的索引，例如FACTORY_4到MATERIAL_1的全部工厂ID
+    std::vector<int> routeRobotSeller_; //机器人到卖家的最短距离，第一个值为机器人ID，后面是路线上的工厂ID
 
     std::vector<std::vector<double>> initialHistoryGraph_;
 

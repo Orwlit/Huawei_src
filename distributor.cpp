@@ -41,13 +41,13 @@ bool Distributor::run() {
 //        }
 
         std::cerr << "Frame ID: " << this->context->GetFrameId() << std::endl;
-        bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(3), 20);
+        bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(3), 15);
         if (aboutToCrash){
             this->context->GetRobot(0)->Rotate(M_PI);
             this->context->GetRobot(3)->Rotate(M_PI);
         }else {
-            this->context->GetRobot(0)->HighSpeedMove(50.0f, 20.0f, this->context->GetDt());
-            this->context->GetRobot(3)->HighSpeedMove(0.0f, 20.0f, this->context->GetDt());
+            this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
+            this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
         }
 //        for (int i = 0; i < 4; ++i) {
 //            for (int j = 0; j < 4; ++j) {
@@ -67,21 +67,6 @@ bool Distributor::run() {
     return false;
 }
 
-bool Distributor::StrategyGlobal() {
-
-    return false;
-}
-
-bool Distributor::MaintainGraph() {
-
-
-
-    return false;
-}
-
-void Distributor::FloydMinDistance() const {
-
-}
 
 bool Distributor::GraphOptimization() {
 
@@ -147,5 +132,12 @@ std::vector<double> Distributor::BellmanFordDistance(std::vector<std::vector<int
     }
     return route;
 }
+
+void Distributor::DistributeTask(std::vector<int> route) {
+    //TODO: 这个函数完成两个功能:
+    // 1. 根据机器人到卖家的最短路径route，分配一组买卖任务
+    // 2. 分配任务后将相应路径的权值设为正无穷
+}
+
 
 
