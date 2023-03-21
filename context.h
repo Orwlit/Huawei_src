@@ -8,6 +8,9 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <iostream>
+#include <map>
+#include <cmath>
 
 #include "robot.h"
 #include "factory.h"
@@ -71,7 +74,8 @@ private:
     std::vector<int> eightFactoriesIndex_;
     std::vector<int> nineFactoriesIndex_;
 
-    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryMap_; //按工厂类型的索引，例如FACTORY_4到MATERIAL_1的全部工厂ID
+    std::map<int, std::map<FactoryType, std::vector<double*>>> idTypeEdge_; // 依次按工厂id、工厂类型type进行索引，返回这个id的工厂对应所有type类型的权值指针
+    std::map<FactoryType, std::map<FactoryType, std::vector<int>>> globalFactoryTypeMap_; //按工厂类型的索引，例如FACTORY_4到MATERIAL_1的全部工厂ID
     std::vector<int> routeRobotSeller_; //机器人到卖家的最短距离，第一个值为机器人ID，后面是路线上的工厂ID
 
     std::vector<std::vector<double>> initialHistoryGraph_;
