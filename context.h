@@ -25,7 +25,7 @@ public:
     void FactoriesClassification();
 
     // 基本工具
-    std::map<FactoryType, std::pair<bool, bool>> Context::WarehouseStateConversion(FactoryType type, int rawInfo);
+    std::map<FactoryType, std::pair<bool, bool>> WarehouseStateConversion(FactoryType type, int rawInfo);
     void PrintHistoryMap(const std::vector<std::vector<double>> &map, const std::string &title) const;
 
     // 各种对象间的距离
@@ -47,10 +47,7 @@ public:
     [[nodiscard]] const std::vector<std::shared_ptr<Factory>> &GetAllFactories() const;
     [[nodiscard]] std::shared_ptr<Robot> GetRobot(int robotIndex) const;
     [[nodiscard]] std::shared_ptr<Factory> GetFactory(int factoryIndex) const;
-
     [[nodiscard]] const std::map<FactoryType, std::map<FactoryType, std::vector<int>>> &GetGlobalFactoryTypeMap() const;
-//    [[nodiscard]] std::map<FactoryType, std::map<FactoryType, std::vector<int>>> GetGlobalFactoryTypeMap() const;
-
     [[nodiscard]] const std::vector<std::vector<double>> &GetInitialHistoryGraph() const;
     [[nodiscard]] int GetNodeTotalNum() const;
     [[nodiscard]] int GetFactoryTotalNum() const;

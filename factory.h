@@ -73,11 +73,9 @@ public:
 //    void SetWarehouseType(FactoryType warehouseType);
     bool SetWarehouseState(const std::map<FactoryType, std::pair<bool, bool>> &warehouseState);
     void SetWarehouseState(FactoryType type, bool state);
+    void SetWarehouseFlag(FactoryType type, bool flag);
     void SetWarehouseType(const std::set<FactoryType> &warehouseType);
-    //    bool SetWarehouseState(FactoryType type, bool state);
-//    bool SetWarehouseState(std::set<FactoryType> warehouseType);
     bool SetProductStatus(bool state);
-
 
 };
 

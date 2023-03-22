@@ -254,7 +254,7 @@ bool Context::Initialize() {
 
                 // 初始化仓库状态
                 std::set<FactoryType> warehouseType;
-                std::map<FactoryType, bool> warehouseState;
+                std::map<FactoryType, std::pair<bool, bool>> warehouseState;
                 int factory_index_shift = this->GetRobotTotalNum();
                 switch (factoryType) {
                     case FactoryType::UNKNOWN:
@@ -269,7 +269,8 @@ bool Context::Initialize() {
                         this->globalFactoryTypeMap_[FACTORY_5][MATERIAL_1].push_back(factoryID);
 
                         warehouseType.insert(UNKNOWN);
-                        warehouseState[UNKNOWN] = false;
+                        warehouseState[UNKNOWN].first = false;
+                        warehouseState[UNKNOWN].second = false;
                         break;
                     case FactoryType::MATERIAL_2:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::A);
@@ -279,7 +280,8 @@ bool Context::Initialize() {
                         this->globalFactoryTypeMap_[FACTORY_6][MATERIAL_2].push_back(factoryID);
 
                         warehouseType.insert(UNKNOWN);
-                        warehouseState[UNKNOWN] = false;
+                        warehouseState[UNKNOWN].first = false;
+                        warehouseState[UNKNOWN].second = false;
                         break;
                     case FactoryType::MATERIAL_3:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::A);
@@ -290,7 +292,8 @@ bool Context::Initialize() {
                         this->allFactories_[factoryID]->SetWarehouseState(UNKNOWN, false);
 
                         warehouseType.insert(UNKNOWN);
-                        warehouseState[UNKNOWN] = false;
+                        warehouseState[UNKNOWN].first = false;
+                        warehouseState[UNKNOWN].second = false;
                         break;
 
                     case FactoryType::FACTORY_4:
@@ -302,9 +305,11 @@ bool Context::Initialize() {
                         this->globalFactoryTypeMap_[SELLER_9][FACTORY_4].push_back(factoryID);
 
                         warehouseType.insert(MATERIAL_1);
-                        warehouseState[MATERIAL_1] = false;
+                        warehouseState[MATERIAL_1].first = false;
+                        warehouseState[MATERIAL_1].second = false;
                         warehouseType.insert(MATERIAL_2);
-                        warehouseState[MATERIAL_2] = false;
+                        warehouseState[MATERIAL_2].first = false;
+                        warehouseState[MATERIAL_2].second = false;
                         break;
                     case FactoryType::FACTORY_5:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::B);
@@ -315,9 +320,11 @@ bool Context::Initialize() {
                         this->globalFactoryTypeMap_[SELLER_9][FACTORY_5].push_back(factoryID);
 
                         warehouseType.insert(MATERIAL_1);
-                        warehouseState[MATERIAL_1] = false;
+                        warehouseState[MATERIAL_1].first = false;
+                        warehouseState[MATERIAL_1].second = false;
                         warehouseType.insert(MATERIAL_3);
-                        warehouseState[MATERIAL_3] = false;
+                        warehouseState[MATERIAL_3].first = false;
+                        warehouseState[MATERIAL_3].second = false;
                         break;
                     case FactoryType::FACTORY_6:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::B);
@@ -328,9 +335,11 @@ bool Context::Initialize() {
                         this->globalFactoryTypeMap_[SELLER_9][FACTORY_6].push_back(factoryID);
 
                         warehouseType.insert(MATERIAL_2);
-                        warehouseState[MATERIAL_2] = false;
+                        warehouseState[MATERIAL_2].first = false;
+                        warehouseState[MATERIAL_2].second = false;
                         warehouseType.insert(MATERIAL_3);
-                        warehouseState[MATERIAL_3] = false;
+                        warehouseState[MATERIAL_3].first = false;
+                        warehouseState[MATERIAL_3].second = false;
                         break;
 
                     case FactoryType::FACTORY_7:
@@ -341,11 +350,14 @@ bool Context::Initialize() {
                         this->globalFactoryTypeMap_[SELLER_9][FACTORY_7].push_back(factoryID);
 
                         warehouseType.insert(FACTORY_4);
-                        warehouseState[FACTORY_4] = false;
+                        warehouseState[FACTORY_4].first = false;
+                        warehouseState[FACTORY_4].second = false;
                         warehouseType.insert(FACTORY_5);
-                        warehouseState[FACTORY_5] = false;
+                        warehouseState[FACTORY_5].first = false;
+                        warehouseState[FACTORY_5].second = false;
                         warehouseType.insert(FACTORY_6);
-                        warehouseState[FACTORY_6] = false;
+                        warehouseState[FACTORY_6].first = false;
+                        warehouseState[FACTORY_6].second = false;
                         break;
 
                     case FactoryType::SELLER_8:
@@ -354,7 +366,8 @@ bool Context::Initialize() {
                         this->eightFactoriesIndex_.push_back(factoryID);
 
                         warehouseType.insert(FACTORY_7);
-                        warehouseState[FACTORY_7] = false;
+                        warehouseState[FACTORY_7].first = false;
+                        warehouseState[FACTORY_7].second = false;
                         break;
                     case FactoryType::SELLER_9:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::D);
@@ -362,13 +375,17 @@ bool Context::Initialize() {
                         this->nineFactoriesIndex_.push_back(factoryID);
 
                         warehouseType.insert(FACTORY_4);
-                        warehouseState[FACTORY_4] = false;
+                        warehouseState[FACTORY_4].first = false;
+                        warehouseState[FACTORY_4].second = false;
                         warehouseType.insert(FACTORY_5);
-                        warehouseState[FACTORY_5] = false;
+                        warehouseState[FACTORY_5].first = false;
+                        warehouseState[FACTORY_5].second = false;
                         warehouseType.insert(FACTORY_6);
-                        warehouseState[FACTORY_6] = false;
+                        warehouseState[FACTORY_6].first = false;
+                        warehouseState[FACTORY_6].second = false;
                         warehouseType.insert(FACTORY_7);
-                        warehouseState[FACTORY_7] = false;
+                        warehouseState[FACTORY_7].first = false;
+                        warehouseState[FACTORY_7].second = false;
                         break;
                 }
                 this->allFactories_[factoryID]->SetWarehouseType(warehouseType);

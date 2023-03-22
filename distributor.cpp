@@ -30,12 +30,6 @@ bool Distributor::run() {
 
 
 
-
-        if (this->context->GetFrameId() == 2){
-            this->context->PrintHistoryMap(this->globalGraph_, "Distributor::globalGraph_");
-            this->context->PrintHistoryMap(this->historyGraph_, "Distributor::historyGraph_");
-        }
-
 //        std::cerr << "FactoryType: " << this->context->GetFactory(9)->GetFactoryType() << std::endl;
 //        auto a = FromIdTypeFindEdgeIndex(9, MATERIAL_1);
 
@@ -43,8 +37,26 @@ bool Distributor::run() {
         //开始与控制台交互
         std::cout << this->context->GetFrameId() << std::endl;
 
-//        this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
-//        this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
+//        for (int robot_index = 0; robot_index < this->context->GetRobotTotalNum(); ++robot_index) {
+//            if (this->context->GetRobot(robot_index)->GetFlag() == ROBOT_READY){
+//                auto route = this->BellmanFordRoute(robot_index, 16);
+//                this->DistributeTask(route);
+//            }
+//        }
+
+
+
+
+
+        if (this->context->GetFrameId() > 200){
+
+            this->context->GetRobot(0)->HighSpeedMove(10.0f, 10.0f, this->context->GetDt());
+            this->context->GetRobot(3)->HighSpeedMove(40.0f, 10.0f, this->context->GetDt());
+        } else{
+            this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
+            this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
+
+        }
 
 
 //        if (!(this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(1), 8.5))){
@@ -288,10 +300,6 @@ void Distributor::FFBroadcastUpdate() {
 
                 std::vector<int> edges_to = this->FromIdTypeFindEdgeIndex(factory_index, warehouse_type);
 //                std::cerr << "找到的edges_to: ";
-                for (auto item : edges_to) {
-                    std::cerr << factory_index << " ";
-                }
-                std::cerr << std::endl;
                 // 仓库状态为true，代表有货物，即为没有需求，正无穷
                 bool no_need = !(warehouse_state[warehouse_type].first | warehouse_state[warehouse_type].second);
                 if (no_need){
@@ -303,7 +311,6 @@ void Distributor::FFBroadcastUpdate() {
 //                    std::cerr << "2 下游有需求" << std::endl;
                     // 下游有需求，对warehouse_type类的所有上游index循环
                     for (auto edge_to_index : edges_to ) {
-                        std::cerr << edge_from_index << std::endl;
                         int up_index = edge_to_index - this->factoryIDShift_;
                         bool product_state = this->context->GetFactory(up_index)->GetProductState();
                         // 上游有产品

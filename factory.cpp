@@ -57,6 +57,10 @@ void Factory::SetWarehouseState(FactoryType type, bool state) {
     this->warehouseState_[type].first = state;
 }
 
+void Factory::SetWarehouseFlag(FactoryType type, bool flag) {
+    this->warehouseState_[type].second = flag;
+}
+
 bool Factory::SetProductStatus(bool state) {
     if (state != 0 && state != 1){
         std::cerr << "FactoryID: " << this->factoryID_
