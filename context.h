@@ -24,15 +24,16 @@ public:
     bool GenerateHistoryGraph();
     void FactoriesClassification();
 
+    // 基本工具
     static std::map<FactoryType, bool> WarehouseStateConversion(FactoryType type, int rawInfo);
-    void PrintHistoryMap() const;
+    void PrintHistoryMap(const std::vector<std::vector<double>> &map, const std::string &title) const;
 
-    //Distance between Factories or Robots
+    // 各种对象间的距离
     [[nodiscard]] double DistanceFF(int factory1_ID, int factory2_ID) const;
     [[nodiscard]] double DistanceFR(int robotID, int factoryID) const;
     [[nodiscard]] double DistanceRR(int robot1_ID, int robot2_ID) const;
 
-    //防撞策略
+    // 防撞策略
     [[nodiscard]] bool AboutToCrash(const std::shared_ptr<Robot> &robot1, const std::shared_ptr<Robot> &robot2, float k) const;
 
     //Getter
@@ -46,7 +47,10 @@ public:
     [[nodiscard]] const std::vector<std::shared_ptr<Factory>> &GetAllFactories() const;
     [[nodiscard]] std::shared_ptr<Robot> GetRobot(int robotIndex) const;
     [[nodiscard]] std::shared_ptr<Factory> GetFactory(int factoryIndex) const;
+
     [[nodiscard]] const std::map<FactoryType, std::map<FactoryType, std::vector<int>>> &GetGlobalFactoryTypeMap() const;
+//    [[nodiscard]] std::map<FactoryType, std::map<FactoryType, std::vector<int>>> GetGlobalFactoryTypeMap() const;
+
     [[nodiscard]] const std::vector<std::vector<double>> &GetInitialHistoryGraph() const;
     [[nodiscard]] int GetNodeTotalNum() const;
     [[nodiscard]] int GetFactoryTotalNum() const;
@@ -95,7 +99,7 @@ private:
     const int factoryIDShift_ = robotTotalNum_; // 因为前四个为机器人，所以所有工厂序号做相应的偏移
     const std::string OK_ = "OK";
     const double MINIMUM_EQUAL_VALUE_ = 0.001;
-    const double INFINITE_ = 999.0; // 表示无穷大
+    const double INFINITE_ = 99999.0; // 表示无穷大
 
 };
 

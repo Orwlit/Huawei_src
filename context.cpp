@@ -112,7 +112,11 @@ bool Context::UpdateAllStatus() {
             std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
         }
 
-        if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
+        FactoryClass current_factory_class = this->GetFactory(factory_index)->GetFactoryClass();
+        // 认为A类工厂始终有产品
+        if (current_factory_class == FactoryClass::A){
+            this->allFactories_[factory_index]->SetProductStatus(true);
+        } else if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
         }
     }
@@ -281,8 +285,8 @@ bool Context::Initialize() {
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::A);
                         threeFactories_.push_back(this->allFactories_[factoryID]);
                         this->threeFactoriesIndex_.push_back(factoryID);
-//                        this->globalFactoryTypeMap_[FACTORY_5][MATERIAL_3].push_back(factoryID);
-//                        this->globalFactoryTypeMap_[FACTORY_6][MATERIAL_3].push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_5][MATERIAL_3].push_back(factoryID);
+                        this->globalFactoryTypeMap_[FACTORY_6][MATERIAL_3].push_back(factoryID);
                         this->allFactories_[factoryID]->SetWarehouseState(UNKNOWN, false);
 
                         warehouseType.insert(UNKNOWN);
@@ -732,6 +736,10 @@ const int Context::GetRobotTotalNum() const {
     return robotTotalNum_;
 }
 
+//std::map<FactoryType, std::map<FactoryType, std::vector<int>>> Context::GetGlobalFactoryTypeMap() const {
+//    return globalFactoryTypeMap_;
+//}
+
 const std::map<FactoryType, std::map<FactoryType, std::vector<int>>> &Context::GetGlobalFactoryTypeMap() const {
     return globalFactoryTypeMap_;
 }
@@ -744,9 +752,12 @@ int Context::GetNodeTotalNum() const {
     return nodeTotalNum_;
 }
 
-// 打印历史图信息
-void Context::PrintHistoryMap() const {
-    std::cerr << "history graph: " << initialHistoryGraph_.size() << "x" << initialHistoryGraph_[0].size() << std::endl;
+// 打印任意图信息
+void Context::PrintHistoryMap(const std::vector<std::vector<double>> &map, const std::string &title) const {
+    // 打印标题
+    std::cerr << title << ": " << map.size() << "x" << map[0].size() << std::endl;
+
+    // 打印行索引
     std::cerr << " \t";
     for (int i = 0; i < this->robotTotalNum_; ++i) {
         std::cerr << this->GetRobot(i)->GetRobotID() << "\t";
@@ -756,16 +767,18 @@ void Context::PrintHistoryMap() const {
     }
     std::cerr << std::endl;
 
-    for (int i = 0; i < this->initialHistoryGraph_.size(); ++i) {
+    for (int i = 0; i < map.size(); ++i) {
+        // 打印列索引
         if (i <= 3){
             std::cerr << this->GetRobot(i)->GetRobotID() << "\t";
         }else{
             std::cerr << this->GetFactory(i- this->factoryIDShift_)->GetFactoryType() << "\t";
         }
-        for (int j = 0; j < this->initialHistoryGraph_[i].size(); ++j) {
-            std::cerr << initialHistoryGraph_[i][j] << "\t";
+
+        // 打印一整行
+        for (int j = 0; j < map[i].size(); ++j) {
+            std::cerr << map[i][j] << "\t";
         }
-//        std::cerr << initialHistoryGraph_[i].size() << " ";
         std::cerr << std::endl;
     }
 }

@@ -14,28 +14,43 @@ Distributor::Distributor() {
     this->factoryIDShift_ = this->context->GetRobotTotalNum();
 
     this->historyGraph_ = DeepCopy2DVector(this->context->GetInitialHistoryGraph());
+    this->globalGraph_ = DeepCopy2DVector(this->context->GetInitialHistoryGraph());
 
     std::cout << "OK" << std::flush; // 准备就绪，开始答题
 }
 
 bool Distributor::run() {
     while (this->context->UpdateAllStatus()){
+        std::cerr << "Frame ID: " << this->context->GetFrameId() << std::endl;
+
+        // 根据广播更新地图
+        this->UpdateFromBroadcast();
+
+
+
+
+
+
+        if (this->context->GetFrameId() == 2){
+            this->context->PrintHistoryMap(this->globalGraph_, "Distributor::globalGraph_");
+            this->context->PrintHistoryMap(this->historyGraph_, "Distributor::historyGraph_");
+        }
+
+//        std::cerr << "FactoryType: " << this->context->GetFactory(9)->GetFactoryType() << std::endl;
+//        auto a = FromIdTypeFindEdgeIndex(9, MATERIAL_1);
+
 
         //开始与控制台交互
         std::cout << this->context->GetFrameId() << std::endl;
 
-        std::cerr << "FactoryType: " << this->context->GetFactory(9)->GetFactoryType() << std::endl;
-        auto a = FromIdTypeFindEdgeIndex(9, MATERIAL_1);
-
-        this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
-        this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
+//        this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
+//        this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
 
 
 //        if (!(this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(1), 8.5))){
 //            std::cerr << "Frame ID: " << this->context->GetFrameId() << std::endl;
 //        }
 
-        std::cerr << "Frame ID: " << this->context->GetFrameId() << std::endl;
 //        bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(0), this->context->GetRobot(3), 15);
 //        if (aboutToCrash){
 //            this->context->GetRobot(0)->Rotate(M_PI);
@@ -113,10 +128,10 @@ void Distributor::CheckAllRobotsState()
         {
             if(!this->context->GetRobot(robotID)->taskRoute_.empty())
             {
-                if ()
-                {
-                    /* code */
-                }
+//                if ()
+//                {
+//                    /* code */
+//                }
                 
             }
         }
@@ -191,10 +206,12 @@ std::pair<double, std::vector<int>> Distributor::BellmanFordRoute(int src, int t
 
 // 根据传入的工厂id和类型，找到所有对应的权值（矩阵块），并返回对应目标工厂的id
 std::vector<int> Distributor::FromIdTypeFindEdgeIndex(int factory_index, FactoryType to_factoryType) const {
-    int factory_shift = this->context->GetRobotTotalNum();
-    FactoryType current_type = this->context->GetFactory(factory_index)->GetFactoryType();
+
+    int factory_shift = this->context->GetRobotTotalNum(); // checked
+    FactoryType current_type = this->context->GetFactory(factory_index)->GetFactoryType(); // checked
+
     std::vector<int> to_index = this->context->GetGlobalFactoryTypeMap().at(current_type).at(to_factoryType);
-//    std::cerr << "FromIdTypeFindEdgeIndex::to_index.size()" << to_index.size() << std::endl;
+
     for (int i = 0; i < to_index.size(); ++i) {
         to_index[i] += factory_shift;
     }
@@ -215,9 +232,22 @@ std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector
 }
 
 void Distributor::UpdateFromBroadcast() {
+    // 对所有工厂-工厂按广播更新权值
     this->FFBroadcastUpdate();
-    for (int ready_robot_index : ) {
 
+    // 对所有机器人-工厂按广播更新权值
+    for (int robot_index = 0; robot_index < this->context->GetRobotTotalNum(); ++robot_index) {
+        RobotFlag current_robot_flag = this->context->GetRobot(robot_index)->GetFlag();
+
+        // 对空闲的机器人按照目的地工厂是否有产品更新权值
+        if (current_robot_flag == ROBOT_READY){
+            for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
+                RFBroadcastUpdate(robot_index, factory_index);
+            }
+        } else {
+            // 对不空闲的机器人来说，不参与分配任务、不更新地图
+            continue;
+        }
     }
 }
 
@@ -252,22 +282,37 @@ void Distributor::FFBroadcastUpdate() {
             auto warehouse_state = this->context->GetFactory(factory_index)->GetWarehouseState();
             // 对该类型的每个仓库格类型循环
             for (auto warehouse_type : this->context->GetFactory(factory_index)->GetWarehouseType()) {
-                std::vector<int> edges_to = this->FromIdTypeFindEdgeIndex(factory_index, warehouse_type);
+//                std::cerr << "1 是BC CLASS" << std::endl;
+//                std::cerr << "工厂id: " << factory_index << " 现在仓库类型为: " << warehouse_type << std::endl;
 
+
+                std::vector<int> edges_to = this->FromIdTypeFindEdgeIndex(factory_index, warehouse_type);
+//                std::cerr << "找到的edges_to: ";
+                for (auto item : edges_to) {
+                    std::cerr << factory_index << " ";
+                }
+                std::cerr << std::endl;
                 // 仓库状态为true，代表有货物，即为没有需求，正无穷
-                if (warehouse_state[warehouse_type]){
+                bool no_need = warehouse_state[warehouse_type];
+                if (no_need){
+//                    std::cerr << "2 下游无需求" << std::endl;
                     for (auto edge_to_index : edges_to) {
                         this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->INFINITE_);
+
                     }
                 } else {
+//                    std::cerr << "2 下游有需求" << std::endl;
                     // 下游有需求，对warehouse_type类的所有上游index循环
                     for (auto edge_to_index : edges_to ) {
+                        std::cerr << edge_from_index << std::endl;
                         int up_index = edge_to_index - this->factoryIDShift_;
                         bool product_state = this->context->GetFactory(up_index)->GetProductState();
                         // 上游有产品
                         if (product_state){
+//                            std::cerr << "3 上游有产品" << std::endl;
                             this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->MAX_ENCOURAGE_);
                         } else {
+//                            std::cerr << "3 上游无产品" << std::endl;
                             // 上游没有产品，根据是否在生产决定
                             FactoryFlag up_flag = this->context->GetFactory(up_index)->GetFactoryFlag();
                             // 在生产
