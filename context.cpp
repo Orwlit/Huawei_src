@@ -414,17 +414,7 @@ bool Context::Initialize() {
 
     this->factoryTotalNum_ = factoryID;
 
-    // 检查globalFactoryTypeMap_，打印信息
-    for (auto from : this->globalFactoryTypeMap_){
-        for (auto to : from.second) {
-            std::cerr << "All index of FactoryType: " << from.first << " to ";
-            std::cerr << to.first << " is: ";
-            for (auto index : to.second) {
-                std::cerr << index << " ";
-            }
-            std::cerr << std::endl;
-        }
-    }
+
 
     //读取OK，判断信息结束
     std::string ok_get;
@@ -745,7 +735,7 @@ std::map<FactoryType, std::pair<bool, bool>> Context::WarehouseStateConversion(F
 }
 
 
-int Context::GetFactoryTotalNum() const {
+const int Context::GetFactoryTotalNum() const {
     return factoryTotalNum_;
 }
 
@@ -765,12 +755,12 @@ const std::vector<std::vector<double>> &Context::GetInitialHistoryGraph() const 
     return initialHistoryGraph_;
 }
 
-int Context::GetNodeTotalNum() const {
+const int Context::GetNodeTotalNum() const {
     return nodeTotalNum_;
 }
 
 // 打印任意图信息
-void Context::PrintHistoryMap(const std::vector<std::vector<double>> &map, const std::string &title) const {
+void Context::PrintHistoryMap(const std::vector<std::vector<double>> &map, const std::string &title) {
     // 打印标题
     std::cerr << title << ": " << map.size() << "x" << map[0].size() << std::endl;
 
@@ -797,6 +787,19 @@ void Context::PrintHistoryMap(const std::vector<std::vector<double>> &map, const
             std::cerr << map[i][j] << "\t";
         }
         std::cerr << std::endl;
+    }
+}
+
+void Context::PrintMapMapVector(const std::map<FactoryType, std::map<FactoryType, std::vector<int>>> &map, const std::string &title) {
+    std::cerr << title << ": " << std::endl;
+    for (auto from : map){
+        for (auto to : from.second) {
+            std::cerr <<  "Key1: " << from.first << " Key2: " << to.first << " value: ";
+            for (auto index : to.second) {
+                std::cerr << index << " ";
+            }
+            std::cerr << std::endl;
+        }
     }
 }
 

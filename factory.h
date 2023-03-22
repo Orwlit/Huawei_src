@@ -44,7 +44,9 @@ private:
 
     float coordinate_[2];
     int remainingFrame_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
-    std::map<FactoryType, std::pair<bool, bool>> warehouseState_; //仓库格状态
+
+    //仓库格状态，分别代表仓库格类型、这个格子里有(true)无(false)产品、有(true)无(false)机器人在派送
+    std::map<FactoryType, std::pair<bool, bool>> warehouseState_;
     std::set<FactoryType> warehouseType_;
 //    std::vector<std::pair<int, int>> warehouseState_
     int productState_; //产品格状态

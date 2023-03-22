@@ -34,7 +34,6 @@ public:
 
     //Basic Function
     std::pair<double, std::vector<int>> BellmanFordRoute(int src, int target);
-    std::vector<double> BellmanFordDistance(std::vector<std::vector<int>>& graph, int V, int src, int target);
     void PreserveAndUpdateInfo(int u, int v, double value); // 将u，v坐标的数据保存到历史地图
     void ExtractInfo(int u, int v); // 将u，v坐标的数据从历史地图读出
 
@@ -72,6 +71,7 @@ private:
     const double MAX_ENCOURAGE_ = 0.0; // 表示最大激励
     const double ZERO_ = 0.1; // 表示0?
     const double distanceCoefficient_ = 1;
+    const double chargeVelocity_ = 6.0; // 机器人预想冲刺速度，用于RFBroadcastUpdate中调整机器人-工厂是否忽略产品状态
 
 };
 #endif //HUAWEI_DISTRIBUTOR_H

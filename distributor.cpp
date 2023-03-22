@@ -26,6 +26,17 @@ bool Distributor::run() {
         // 根据广播更新地图
         this->UpdateFromBroadcast();
 
+        if (this->context->GetFrameId() == 1){
+            FactoryType factoryType = FACTORY_4;
+            auto test = this->context->WarehouseStateConversion(factoryType, 96);
+            std::cerr << "--------------------------------" << std::endl;
+            std::cerr << "WarehouseStateConversion" << ": " << std::endl;
+            for (auto from: test) {
+                std::cerr << "Key: " << from.first << " value1: " << from.second.first << " value2: "
+                          << from.second.second;
+                std::cerr << std::endl;
+            }
+        }
 
 
 
@@ -263,13 +274,19 @@ void Distributor::UpdateFromBroadcast() {
     }
 }
 
-// 考虑到机器人分为BUSY和READY，这里传入机器人ID和工厂ID从而更新机器人到工厂的状态
+// 考虑到机器人分为BUSY和READY，这里传入机器人ID和工厂ID，按工厂有无产品更新机器人-工厂权值
 void Distributor::RFBroadcastUpdate(int robot_index, int factory_index) {
     int factory_index_shift = factory_index + this->factoryIDShift_;
 
-    // 无：false，有：true
+    // product_state 无产品：false，有产品：true
     bool product_state = this->context->GetFactory(factory_index)->GetProductState();
-    if (product_state){
+    double dt = this->context->GetDt();
+    int remaining_frame = this->context->GetFactory(factory_index)->GetRemainingFrame();
+    double distance_charge_to_factory = this->chargeVelocity_ * dt * remaining_frame;
+    double distance = this->context->DistanceFR(robot_index, factory_index);
+    bool ok_to_ignore_product_state = distance > distance_charge_to_factory;
+
+    if (product_state || ok_to_ignore_product_state){
 //        double robot_x = this->context->GetRobot(robot_index)->GetCoordinate()[0];
 //        double robot_y = this->context->GetRobot(robot_index)->GetCoordinate()[1];
 //        double factory_x = this->context->GetFactory(robot_index)->GetCoordinate()[0];
