@@ -138,9 +138,9 @@ bool Robot::Buy(int factoryID) const{
         return false;
     }
     if (factoryID != this->nearbyFactoryID_){
-        std::cerr << "Robot NO." << this->robotID_
-                  << " NOT able to BUY from " << factoryID << ", because NOT around. "
-                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
+//        std::cerr << "Robot NO." << this->robotID_
+//                  << " NOT able to BUY from " << factoryID << ", because NOT around. "
+//                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
         return false;
     }
     std::cout << "buy" << " " << robotID_ << std::endl;
@@ -154,9 +154,9 @@ bool Robot::Sell(int factoryID) const{
         return false;
     }
     if (factoryID != this->nearbyFactoryID_){
-        std::cerr << "Robot NO." << this->robotID_
-                  << " NOT able to SELL from " << factoryID << ", because NOT around. "
-                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
+//        std::cerr << "Robot NO." << this->robotID_
+//                  << " NOT able to SELL from " << factoryID << ", because NOT around. "
+//                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
         return false;
     }
     std::cout << "sell" << " " << robotID_ << std::endl;

@@ -368,6 +368,8 @@ bool Context::Initialize() {
                         warehouseType.insert(FACTORY_7);
                         warehouseState[FACTORY_7].first = false;
                         warehouseState[FACTORY_7].second = false;
+
+                        this->sellers_.push_back(factoryID);
                         break;
                     case FactoryType::SELLER_9:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::D);
@@ -386,6 +388,8 @@ bool Context::Initialize() {
                         warehouseType.insert(FACTORY_7);
                         warehouseState[FACTORY_7].first = false;
                         warehouseState[FACTORY_7].second = false;
+
+                        this->sellers_.push_back(factoryID);
                         break;
                 }
                 this->allFactories_[factoryID]->SetWarehouseType(warehouseType);
