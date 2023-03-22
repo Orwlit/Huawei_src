@@ -53,7 +53,7 @@ bool Context::UpdateAllStatus() {
     int factoryType_cache;
     int remainingFrame_cache;
     int warehouseState_raw_cache;
-    int productStatus_cache;
+    bool productStatus_cache;
     float factory_x_input, factory_y_input;
     for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
 //        std::cerr << "---------------Reading Factory Info---------------" << std::endl;

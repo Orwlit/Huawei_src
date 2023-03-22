@@ -44,7 +44,9 @@ public:
     void UpdateFromPlanning(); // 根据机器人寻路更新权值
     void UpdateFromTask(); // 根据分配任务情况更新权值
 
-    void FFBroadcastUpdate(int up_index, int down_index);// 工厂广播更新
+    // 循环所有工厂，按广播更新
+    void FFBroadcastUpdate();
+    // 考虑到机器人分为BUSY和READY，这里传入机器人ID和工厂ID从而更新机器人到工厂的状态
     void RFBroadcastUpdate(int robot_index, int factory_index);// 机器人广播更新，根据传入的机器人编号和工厂编号，对工厂是否有产品更新权值
 
     //Tasks
@@ -65,7 +67,10 @@ private:
     int factoryIDShift_;
 
     const double DISCONNECT_ = 0.0;
-    const double INFINITE_ = 999.0; // 表示无穷大
+    const double INFINITE_ = 99999.0; // 表示无穷大
+    const double MAX_ENCOURAGE_ = 0.0; // 表示最大激励
+    const double ZERO_ = 0.1; // 表示0?
+    const double distanceCoefficient_ = 1;
 
 };
 #endif //HUAWEI_DISTRIBUTOR_H

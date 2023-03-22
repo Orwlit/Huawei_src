@@ -24,6 +24,8 @@ bool Distributor::run() {
         //开始与控制台交互
         std::cout << this->context->GetFrameId() << std::endl;
 
+        std::cerr << "FactoryType: " << this->context->GetFactory(9)->GetFactoryType() << std::endl;
+        auto a = FromIdTypeFindEdgeIndex(9, MATERIAL_1);
 
         this->context->GetRobot(0)->HighSpeedMove(40.0f, 40.0f, this->context->GetDt());
         this->context->GetRobot(3)->HighSpeedMove(10.0f, 40.0f, this->context->GetDt());
@@ -205,6 +207,10 @@ std::vector<int> Distributor::FromIdTypeFindEdgeIndex(int factory_index, Factory
     int factory_shift = this->context->GetRobotTotalNum();
     FactoryType current_type = this->context->GetFactory(factory_index)->GetFactoryType();
     std::vector<int> to_index = this->context->GetGlobalFactoryTypeMap().at(current_type).at(to_factoryType);
+//    std::cerr << "FromIdTypeFindEdgeIndex::to_index.size()" << to_index.size() << std::endl;
+    for (int i = 0; i < to_index.size(); ++i) {
+        to_index[i] += factory_shift;
+    }
 
     return to_index;
 };
@@ -217,62 +223,80 @@ std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector
         }
     }
     return copy;
+    std::vector<int > a;
+    a.reserve(0);
 }
 
 void Distributor::UpdateFromBroadcast() {
+    this->FFBroadcastUpdate();
+    for (int ready_robot_index : ) {
 
-}
-
-void Distributor::RFBroadcastUpdate(int robot_index, int factory_index) {
-    // 无：0，有：1
-    int product_state = this->context->GetFactory(factory_index)->GetProductState();
-    if (product_state == 1){
-        double robot_x = this->context->GetRobot(robot_index)->GetCoordinate()[0];
-        double robot_y = this->context->GetRobot(robot_index)->GetCoordinate()[1];
-        double factory_x = this->context->GetFactory(robot_index)->GetCoordinate()[0];
-        double factory_y = this->context->GetFactory(robot_index)->GetCoordinate()[1];
-        double distance = sqrt(pow(factory_x - robot_x, 2) + pow(factory_y - robot_y, 2));
-
-        // 是否需要保存历史数据???
-//        this->historyGraph_[robot_index][factory_index + this->factoryIDShift_] = this->globalGraph_[robot_index][factory_index + this->factoryIDShift_];
-//        this->historyGraph_[factory_index + this->factoryIDShift_][robot_index] = this->globalGraph_[factory_index + this->factoryIDShift_][robot_index];
-        // 更新权值
-        this->globalGraph_[robot_index][factory_index + this->factoryIDShift_] = distance;
-        this->globalGraph_[factory_index + this->factoryIDShift_][robot_index] = distance;
-    } else if (product_state == 0){
-        // 保存历史数据
-        this->historyGraph_[robot_index][factory_index + this->factoryIDShift_] = this->globalGraph_[robot_index][factory_index + this->factoryIDShift_];
-        this->historyGraph_[factory_index + this->factoryIDShift_][robot_index] = this->globalGraph_[factory_index + this->factoryIDShift_][robot_index];
-        // 更新权值
-        this->globalGraph_[robot_index][factory_index + this->factoryIDShift_] = this->INFINITE_;
-        this->globalGraph_[factory_index + this->factoryIDShift_][robot_index] = this->INFINITE_;
     }
 }
 
-void Distributor::FFBroadcastUpdate(int up_index, int down_index) {
+// 考虑到机器人分为BUSY和READY，这里传入机器人ID和工厂ID从而更新机器人到工厂的状态
+void Distributor::RFBroadcastUpdate(int robot_index, int factory_index) {
+    int factory_index_shift = factory_index + this->factoryIDShift_;
+
+    // 无：false，有：true
+    bool product_state = this->context->GetFactory(factory_index)->GetProductState();
+    if (product_state){
+//        double robot_x = this->context->GetRobot(robot_index)->GetCoordinate()[0];
+//        double robot_y = this->context->GetRobot(robot_index)->GetCoordinate()[1];
+//        double factory_x = this->context->GetFactory(robot_index)->GetCoordinate()[0];
+//        double factory_y = this->context->GetFactory(robot_index)->GetCoordinate()[1];
+//        double distance = sqrt(pow(factory_x - robot_x, 2) + pow(factory_y - robot_y, 2));
+
+        double distance_coe = (this->distanceCoefficient_) * (this->context->DistanceFR(robot_index, factory_index));
+        this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
+    } else {
+        this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
+    }
+}
+
+void Distributor::FFBroadcastUpdate() {
+    // factory_index: 下游工厂
     for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
         FactoryClass current_class = this->context->GetFactory(factory_index)->GetFactoryClass();
+        int edge_from_index = factory_index + this->factoryIDShift_;
+
         // 对4567类型工厂的仓库状态循环
         if (current_class == FactoryClass::B || current_class == FactoryClass::C){
             auto warehouse_state = this->context->GetFactory(factory_index)->GetWarehouseState();
+            // 对该类型的每个仓库格类型循环
             for (auto warehouse_type : this->context->GetFactory(factory_index)->GetWarehouseType()) {
-                if (warehouse_state[warehouse_type]){ // 仓库状态为true，代表有货物，即为没有需求
-                    //TODO: 根据是否在生产决定权值
+                std::vector<int> edges_to = this->FromIdTypeFindEdgeIndex(factory_index, warehouse_type);
+
+                // 仓库状态为true，代表有货物，即为没有需求，正无穷
+                if (warehouse_state[warehouse_type]){
+                    for (auto edge_to_index : edges_to) {
+                        this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->INFINITE_);
+                    }
                 } else {
-                    //TODO: 有需求，负无穷
+                    // 下游有需求，对warehouse_type类的所有上游index循环
+                    for (auto edge_to_index : edges_to ) {
+                        int up_index = edge_to_index - this->factoryIDShift_;
+                        bool product_state = this->context->GetFactory(up_index)->GetProductState();
+                        // 上游有产品
+                        if (product_state){
+                            this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->MAX_ENCOURAGE_);
+                        } else {
+                            // 上游没有产品，根据是否在生产决定
+                            FactoryFlag up_flag = this->context->GetFactory(up_index)->GetFactoryFlag();
+                            // 在生产
+                            if (up_flag == FactoryFlag::PRODUCING){
+                                this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->INFINITE_);
+                            } else {
+                                this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->ZERO_);
+                            }
+                        }
+                    }
                 }
             }
+        } else { // 工厂类型不为4567，本身不能当作下游，继续循环
+            continue;
         }
     }
-
-
-    FactoryType up_type = this->context->GetFactory(up_index)->GetFactoryType();
-    FactoryType down_type = this->context->GetFactory(down_index)->GetFactoryType();
-    auto down_warehouse_state = this->context->GetFactory(down_index)->GetWarehouseState();
-    auto down_warehouse_type = this->context->GetFactory(down_index)->GetWarehouseType();
-    FactoryFlag down_demand;
-
-
 }
 
 void Distributor::PreserveAndUpdateInfo(int u, int v, double value) {

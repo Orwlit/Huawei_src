@@ -57,7 +57,7 @@ void Factory::SetWarehouseState(FactoryType type, bool state) {
     this->warehouseState_[type] = state;
 }
 
-bool Factory::SetProductStatus(int state) {
+bool Factory::SetProductStatus(bool state) {
     if (state != 0 && state != 1){
         std::cerr << "FactoryID: " << this->factoryID_
                   << "\tSetProductStatus OUT OF RANGE, should be 0 or 1: " << std::endl;
@@ -88,7 +88,7 @@ std::map<FactoryType, bool> Factory::GetWarehouseState() const {
     return this->warehouseState_;
 }
 
-int Factory::GetProductState() const {
+bool Factory::GetProductState() const {
     return productState_;
 }
 

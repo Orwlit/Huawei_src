@@ -46,7 +46,7 @@ private:
     std::map<FactoryType, bool> warehouseState_; //仓库格状态
     std::set<FactoryType> warehouseType_;
 //    std::vector<std::pair<int, int>> warehouseState_
-    int productState_; //产品格状态
+    bool productState_; //产品格状态
 
     int MAX_REMAINING_FRAME_;
 public:
@@ -61,7 +61,7 @@ public:
     [[nodiscard]] int GetFactoryId() const;
     [[nodiscard]] int GetRemainingFrame() const;
     [[nodiscard]] std::map<FactoryType, bool> GetWarehouseState() const;
-    [[nodiscard]] int GetProductState() const;
+    [[nodiscard]] bool GetProductState() const;
     [[nodiscard]] const std::set<FactoryType> &GetWarehouseType() const;
 
     //Setter
@@ -75,7 +75,7 @@ public:
     void SetWarehouseType(const std::set<FactoryType> &warehouseType);
     //    bool SetWarehouseState(FactoryType type, bool state);
 //    bool SetWarehouseState(std::set<FactoryType> warehouseType);
-    bool SetProductStatus(int state);
+    bool SetProductStatus(bool state);
 
 
 };
