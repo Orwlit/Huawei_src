@@ -25,7 +25,7 @@ public:
     void FactoriesClassification();
 
     // 基本工具
-    static std::map<FactoryType, bool> WarehouseStateConversion(FactoryType type, int rawInfo);
+    std::map<FactoryType, std::pair<bool, bool>> Context::WarehouseStateConversion(FactoryType type, int rawInfo);
     void PrintHistoryMap(const std::vector<std::vector<double>> &map, const std::string &title) const;
 
     // 各种对象间的距离

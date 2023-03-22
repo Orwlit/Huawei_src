@@ -31,7 +31,8 @@ enum FactoryClass{
 enum FactoryFlag{
     READY = 0,
     PRODUCING = 1,
-    VACANT = 2
+    VACANT = 2, 
+    DELIVERING = 3
 };
 
 class Factory{
@@ -43,10 +44,10 @@ private:
 
     float coordinate_[2];
     int remainingFrame_; //剩余生产帧数: -1表示没有生产 0表示生产因输出格满而阻塞 >=0表示剩余生产帧数
-    std::map<FactoryType, bool> warehouseState_; //仓库格状态
+    std::map<FactoryType, std::pair<bool, bool>> warehouseState_; //仓库格状态
     std::set<FactoryType> warehouseType_;
 //    std::vector<std::pair<int, int>> warehouseState_
-    bool productState_; //产品格状态
+    int productState_; //产品格状态
 
     int MAX_REMAINING_FRAME_;
 public:
@@ -60,7 +61,7 @@ public:
     [[nodiscard]] const float* GetCoordinate() const;
     [[nodiscard]] int GetFactoryId() const;
     [[nodiscard]] int GetRemainingFrame() const;
-    [[nodiscard]] std::map<FactoryType, bool> GetWarehouseState() const;
+    [[nodiscard]] std::map<FactoryType, std::pair<bool, bool>> GetWarehouseState() const;
     [[nodiscard]] bool GetProductState() const;
     [[nodiscard]] const std::set<FactoryType> &GetWarehouseType() const;
 
@@ -70,7 +71,7 @@ public:
     bool SetFlag(FactoryFlag flag);
     bool SetRemainingFrame(int time);
 //    void SetWarehouseType(FactoryType warehouseType);
-    bool SetWarehouseState(const std::map<FactoryType, bool> &warehouseState);
+    bool SetWarehouseState(const std::map<FactoryType, std::pair<bool, bool>> &warehouseState);
     void SetWarehouseState(FactoryType type, bool state);
     void SetWarehouseType(const std::set<FactoryType> &warehouseType);
     //    bool SetWarehouseState(FactoryType type, bool state);

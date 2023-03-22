@@ -48,13 +48,13 @@ bool Factory::SetRemainingFrame(int time) {
     return true;
 }
 
-bool Factory::SetWarehouseState(const std::map<FactoryType, bool> &warehouseState) {
+bool Factory::SetWarehouseState(const std::map<FactoryType, std::pair<bool, bool>> &warehouseState) {
     warehouseState_ = warehouseState;
     return true;
 }
 
 void Factory::SetWarehouseState(FactoryType type, bool state) {
-    this->warehouseState_[type] = state;
+    this->warehouseState_[type].first = state;
 }
 
 bool Factory::SetProductStatus(bool state) {
@@ -84,7 +84,7 @@ int Factory::GetRemainingFrame() const {
     return remainingFrame_;
 }
 
-std::map<FactoryType, bool> Factory::GetWarehouseState() const {
+std::map<FactoryType, std::pair<bool, bool>> Factory::GetWarehouseState() const {
     return this->warehouseState_;
 }
 

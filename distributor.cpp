@@ -128,10 +128,10 @@ void Distributor::CheckAllRobotsState()
         {
             if(!this->context->GetRobot(robotID)->taskRoute_.empty())
             {
-//                if ()
-//                {
-//                    /* code */
-//                }
+                if (this->context->GetRobot(robotID)->GetNearbyFactoryId() == this->context->GetRobot(robotID)->taskRoute_.front());
+                {   // 如果机器人到达了任务路线中的购买材料节点
+                    this->context->GetRobot(robotID)->taskRoute_.pop(); // 移除第一个任务路线节点
+                }
                 
             }
         }
@@ -293,12 +293,11 @@ void Distributor::FFBroadcastUpdate() {
                 }
                 std::cerr << std::endl;
                 // 仓库状态为true，代表有货物，即为没有需求，正无穷
-                bool no_need = warehouse_state[warehouse_type];
+                bool no_need = !(warehouse_state[warehouse_type].first | warehouse_state[warehouse_type].second);
                 if (no_need){
 //                    std::cerr << "2 下游无需求" << std::endl;
                     for (auto edge_to_index : edges_to) {
                         this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->INFINITE_);
-
                     }
                 } else {
 //                    std::cerr << "2 下游有需求" << std::endl;

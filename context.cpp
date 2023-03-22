@@ -107,7 +107,7 @@ bool Context::UpdateAllStatus() {
         }
 
         FactoryType tmp_type = this->GetFactory(factory_index)->GetFactoryType();
-        std::map<FactoryType, bool> warehouseState_cache = WarehouseStateConversion(tmp_type, warehouseState_raw_cache);
+        auto warehouseState_cache = WarehouseStateConversion(tmp_type, warehouseState_raw_cache);
         if (!(this->allFactories_[factory_index]->SetWarehouseState(warehouseState_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
         }
@@ -684,44 +684,44 @@ inline std::vector<int> get_the_one_position(int num)
     return positions;
 }
 
-std::map<FactoryType, bool> Context::WarehouseStateConversion(FactoryType type, int rawInfo){
+std::map<FactoryType, std::pair<bool, bool>> Context::WarehouseStateConversion(FactoryType type, int rawInfo){
     std::vector<int> onePositions = get_the_one_position(rawInfo);
-    std::map<FactoryType, bool> res_;
+    std::map<FactoryType, std::pair<bool, bool>> res_;
     if (type == FACTORY_4) 
     {
-        res_[MATERIAL_1] = false;
-        res_[MATERIAL_2] = false;
+        res_[MATERIAL_1].first = false;
+        res_[MATERIAL_2].first = false;
         for(auto pos : onePositions)
         {
-            res_[static_cast<FactoryType>(pos)] = true;
+            res_[static_cast<FactoryType>(pos)].first = true;
         }
     }
     else if (type == FACTORY_5) 
     {
-        res_[MATERIAL_1] = false;
-        res_[MATERIAL_3] = false;
+        res_[MATERIAL_1].first = false;
+        res_[MATERIAL_3].first = false;
         for(auto pos : onePositions)
         {
-            res_[static_cast<FactoryType>(pos)] = true;
+            res_[static_cast<FactoryType>(pos)].first = true;
         }
     }
     else if (type == FACTORY_6) 
     {
-        res_[MATERIAL_2] = false;
-        res_[MATERIAL_3] = false;
+        res_[MATERIAL_2].first = false;
+        res_[MATERIAL_3].first = false;
         for(auto pos : onePositions)
         {
-            res_[static_cast<FactoryType>(pos)] = true;
+            res_[static_cast<FactoryType>(pos)].first = true;
         }
     }
     else if (type == FACTORY_7)
     {
-        res_[FACTORY_4] = false;
-        res_[FACTORY_5] = false;
-        res_[FACTORY_6] = false;
+        res_[FACTORY_4].first = false;
+        res_[FACTORY_5].first = false;
+        res_[FACTORY_6].first = false;
         for(auto pos : onePositions)
         {
-            res_[static_cast<FactoryType>(pos)] = true;
+            res_[static_cast<FactoryType>(pos)].first = true;
         }
     }
     return res_;
