@@ -5,7 +5,7 @@
 #define HUAWEI_ROBOT_H
 
 #include <vector>
-
+#include <queue>
 //#include "distributor.h"
 
 enum RobotFlag{
@@ -39,6 +39,7 @@ private:
 
 
 public:
+    std::queue<int> taskRoute_;  // 分配给机器人的任务路线，存储的是需要到的工作台的坐标
     Robot();
     Robot(int robotID, float x_initial, float y_initial);
 

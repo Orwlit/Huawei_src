@@ -3,7 +3,7 @@
 //
 #include <iostream>
 #include <cmath>
-
+#include <map>
 #include "distributor.h"
 
 
@@ -70,89 +70,55 @@ bool Distributor::GraphOptimization() {
 }
 
 
-std::vector<double> Distributor::BellmanFordDistance(std::vector<std::vector<int>>& graph, int V, int src, int target) {
-    // 初始化距离数组和路径数组
-    std::vector<double> dist(V, this->INFINITE_);
-    std::vector<int> path(V, -1);
-    dist[src] = 0;
-    std::vector<double> route;
-
-    // 进行V-1轮松弛操作
-    for (int i = 0; i < V - 1; i++) {
-        for (int u = 0; u < V; u++) {
-            for (int v = 0; v < V; v++) {
-                if (graph[u][v] != this->INFINITE_ && dist[u] != this->INFINITE_ && dist[u] + graph[u][v] < dist[v]) {
-                    dist[v] = dist[u] + graph[u][v];
-                    path[v] = u; // 更新前驱节点
-                }
-            }
-        }
-    }
-
-    // 检查负环
-    for (int u = 0; u < V; u++) {
-        for (int v = 0; v < V; v++) {
-            if (graph[u][v] != this->INFINITE_ && dist[u] != this->INFINITE_ && dist[u] + graph[u][v] < dist[v]) {
-                std::cerr << "该图存在负环，无法求解最短路径" << std::endl;
-                return route;
-            }
-        }
-    }
-
-    // 输出最短路径
-    std::cerr << "从源节点 " << src << " 到目标节点 " << target << std::endl;
-    for (int i = 0; i < V; i++) {
-        if (i != target) continue;
-        std::cerr << "最短距离为：" << dist[i] << std::endl;
-    }
-    std::cerr << "最短路径为：";
-    for (int i = 0; i < V; i++) {
-        if (i != target) continue;
-        std::stack<int> s;
-        int j = i;
-        // 从终点回溯到起点，把节点存储在stack中
-        while (j != -1) {
-            s.push(j);
-            j = path[j];
-        }
-        // 从起点一个个弹出路经节点
-        while (!s.empty()) {
-            route.push_back(s.top());
-//            std::cerr << s.top();
-//            if (s.top() != i) {
-//                std::cerr << " -> ";
-//            }
-            s.pop();
-        }
-    }
-    return route;
-}
-
-void Distributor::DistributeTask(std::pair<double, std::vector<int>> route) {
-    //TODO: 这个函数完成两个功能:
+void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route) {
     int robotID = route.second[0];  // 机器人ID
     int thisBuyNode = route.second[1];  // 要去购买东西的节点ID
     int thisSellNode = route.second[2]; // 要去卖东西的节点ID
     FactoryType sellNodeType = this->context->GetFactory(thisSellNode)->GetFactoryType();
     FactoryType buyNodeType = this->context->GetFactory(thisBuyNode)->GetFactoryType();
     std::vector<int> all_buyNode_to_thisSellNode = this->context->GetGlobalFactoryTypeMap().at(this->context->GetFactory(thisSellNode)->GetFactoryType()).at(buyNodeType);
+    
+    // 设置机器人的任务路线
+    this->context->GetRobot(robotID)->taskRoute_.push(thisBuyNode);
+    this->context->GetRobot(robotID)->taskRoute_.push(thisSellNode);
+    // 设置机器人的空闲状态
+    this->context->GetRobot(robotID)->SetFlag(ROBOT_BUSY);
 
     // 把所有要去买的材料类型的节点到卖材料节点的路径锁住
     for(auto buyNodeID : all_buyNode_to_thisSellNode)
     {
         // this->globalGraph_[buyNodeID][thisSellNode] = this->INFINITE_;
         // this->globalGraph_[thisSellNode][buyNodeID] = this->INFINITE_;
-        this->PreserveAndUpdateInfo(thisSellNode,buyNodeID, this->INFINITE_);
+        this->PreserveAndUpdateInfo(thisSellNode, buyNodeID, this->INFINITE_);
     } 
     // 把所有机器人到买材料的节点的路径锁住
     for(auto i = 0; i < this->context->GetRobotTotalNum(); ++i)
     {
         // this->globalGraph_[i][thisBuyNode] = this->INFINITE_;
         // this->globalGraph_[thisBuyNode][i] = this->INFINITE_;
-        this->PreserveAndUpdateInfo(i,thisBuyNode, this->INFINITE_);
+        this->PreserveAndUpdateInfo(i, thisBuyNode, this->INFINITE_);
     }
     // 1. 根据机器人到卖家的最短路径route，分配一组买卖任务
     // 2. 分配任务后将相应路径的权值设为正无穷
+}
+
+void Distributor::CheckAllRobotsState()
+{
+    for(auto robotID = 0; robotID < this->context->GetRobotTotalNum(); ++robotID)
+    {
+        // 如果机器人处于任务状态
+        if (this->context->GetRobot(robotID)->GetFlag() == ROBOT_BUSY)
+        {
+            if(!this->context->GetRobot(robotID)->taskRoute_.empty())
+            {
+                if ()
+                {
+                    /* code */
+                }
+                
+            }
+        }
+    }
 }
 
 /**

@@ -48,8 +48,8 @@ public:
     void RFBroadcastUpdate(int robot_index, int factory_index);// 机器人广播更新，根据传入的机器人编号和工厂编号，对工厂是否有产品更新权值
 
     //Tasks
-    void DistributeTask(std::pair<double, std::vector<int>> route);
-
+    void DistributeTask(std::pair<double, std::vector<int>>& route);
+    void CheckAllRobotsState();
     // 查找工具
     [[nodiscard]] std::vector<int> FromIdTypeFindEdgeIndex(int factory_index, FactoryType to_factoryType) const;
     std::vector<std::vector<double>> DeepCopy2DVector(const std::vector<std::vector<double>>& orig);
@@ -60,7 +60,8 @@ private:
     std::vector<std::vector<double>> globalGraph_;
     std::vector<std::vector<double>> historyGraph_;
     std::map<int, std::map<FactoryType, std::vector<double*>>> idTypeEdge_; // 依次按工厂id、工厂类型type进行索引，返回这个id的工厂对应所有type类型的权值指针
-
+    std::queue<int> busyRobotQueue_;
+    std::queue<int> readyRobotQueue_;
     int nodeTotalNum_;
     int factoryIDShift_;
 
