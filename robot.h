@@ -39,7 +39,8 @@ private:
 
 
 public:
-    std::queue<int> taskRoute_;  // 分配给机器人的任务路线，存储的是需要到的工作台的坐标
+    std::pair<int, int> task_Buy_Sell_;  // 分配给机器人的买卖节点，存储的是买卖节点的Index
+    std::pair<double, double> curTarget_; // 根据任务分配给机器人当前的运动目的地
     Robot();
     Robot(int robotID, float x_initial, float y_initial);
 
