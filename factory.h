@@ -48,7 +48,7 @@ private:
     //仓库格状态，分别代表仓库格类型、这个格子里有(true)无(false)产品、有(true)无(false)机器人在派送
     std::map<FactoryType, std::pair<bool, bool>> warehouseState_;
     std::set<FactoryType> warehouseType_;
-    int productState_; //产品格状态
+    bool productState_; //产品格状态
 
     int MAX_REMAINING_FRAME_;
 public:
