@@ -63,7 +63,7 @@ bool Distributor::run() {
 
                 double route_value = this->INFINITE_;
                 std::pair<double, std::vector<int>> route_best;
-                for (int seller_index : this->context->sellers_) {
+                for (int seller_index : this->context->sellersNode_) {
                     int seller_shift_index = seller_index + this->factoryIDShift_;
                     auto route_tmp = this->BellmanFordRoute(ready_robot_index, seller_index);
                     if (route_value > route_tmp.first){
@@ -192,11 +192,11 @@ void Distributor::CheckAllRobotsState()
                     double buyNode_y = this->context->GetFactory(buyIndex)->GetCoordinate()[1];
                     this->context->GetRobot(robotID)->curTarget_ = std::make_pair(buyNode_x, buyNode_y); // 设置机器人的目标移动点
                     
-                    FactoryType buyNodeType = this->context->GetFactory(buyIndex)->GetFactoryType();  // 获得机器人购买节点的类型
-                    this->context->GetFactory(buyIndex)->SetProductFlag(true);  // 设置购买节点的购买物品位置已经被预定售卖
+                    // FactoryType buyNodeType = this->context->GetFactory(buyIndex)->GetFactoryType();  // 获得机器人购买节点的类型
+                    // this->context->GetFactory(buyIndex)->SetProductFlag(true);  // 设置购买节点的购买物品位置已经被预定售卖
 
-                    FactoryType sellNodeType = this->context->GetFactory(sellIndex)->GetFactoryType();  // 获得机器人售卖节点的类型
-                    this->context->GetFactory(sellIndex)->SetWarehouseFlag(buyNodeType, true);  // 设置售卖节点的收购材料正在送货
+                    // FactoryType sellNodeType = this->context->GetFactory(sellIndex)->GetFactoryType();  // 获得机器人售卖节点的类型
+                    // this->context->GetFactory(sellIndex)->SetWarehouseFlag(buyNodeType, true);  // 设置售卖节点的收购材料正在送货
                 }
             }
             else if (sellIndex != -1)  // 说明机器人已经被分配了卖材料任务
@@ -206,7 +206,7 @@ void Distributor::CheckAllRobotsState()
                 bool haveWarehose = this->context->GetFactory(sellIndex)->GetWarehouseState().at(carryingType).first;
                 if (this->context->GetRobot(robotID)->Sell(sellIndex) && haveWarehose)
                 {
-                    this->context->GetFactory(sellIndex)->SetWarehouseFlag(, false);  // 设置售卖节点的收购完成
+                    this->context->GetFactory(sellIndex)->SetWarehouseFlag(carryingType, false);  // 设置售卖节点的收购完成
                     sellIndex = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
                     this->context->GetRobot(robotID)->SetFlag(ROBOT_READY);  // 机器人完成购买回归空闲状态
                     continue; // 跳帧，等待下一帧检索和分配任务
