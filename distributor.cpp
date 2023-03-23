@@ -134,11 +134,11 @@ void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route)
     int thisBuyNode = route.second[1];  // 要去购买东西的节点ID
     int thisSellNode = route.second[2]; // 要去卖东西的节点ID
 
-    int thisBuy_index = route.second[1] - this->factoryIDShift_;  //
-    int thisSell_index = route.second[2] - this->factoryIDShift_; //
+    int thisBuy_index = thisBuyNode - this->factoryIDShift_;  //
+    int thisSell_index = thisSellNode - this->factoryIDShift_; //
 
-    FactoryType sellNodeType = this->context->GetFactory(thisSell_index)->GetFactoryType();
-    FactoryType buyNodeType = this->context->GetFactory(thisBuy_index)->GetFactoryType();
+    FactoryType sellIndexType = this->context->GetFactory(thisSell_index)->GetFactoryType();
+    FactoryType buyIndexType = this->context->GetFactory(thisBuy_index)->GetFactoryType();
    
     // 设置机器人的任务路线
     this->context->GetRobot(robotID)->task_Buy_Sell_.first = thisBuy_index;
@@ -150,7 +150,7 @@ void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route)
     // !特殊情况
     if (this->context->GetFactory(thisSell_index)->GetFactoryClass() == D)
     {
-        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyNodeType, false); 
+        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyIndexType, false); 
     }
     else
     {
@@ -158,7 +158,7 @@ void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route)
         this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetProductFlag(true);  // 设置购买节点生产的产品以及被预售光了
     
         // FactoryType sellNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetFactoryType();  // 获得机器人售卖节点的类型
-        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyNodeType, true);  // 设置售卖节点的收购材料正在送货
+        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyIndexType, true);  // 设置售卖节点的收购材料正在送货
     }
     // 1. 根据机器人到卖家的最短路径route，分配一组买卖任务
     // 2. 分配任务后将相应路径的权值设为正无穷
@@ -171,46 +171,48 @@ void Distributor::CheckAllRobotsState()
     {   
         // 如果机器人处于任务状态
         if (this->context->GetRobot(robotID)->GetFlag() == ROBOT_BUSY)
-        {
-            if (this->context->GetRobot(robotID)->task_Buy_Sell_.first != -1)  // 说明机器人已经被分配了购买材料任务
+        {   
+            int& buyIndex = this->context->GetRobot(robotID)->task_Buy_Sell_.first;
+            int& sellIndex = this->context->GetRobot(robotID)->task_Buy_Sell_.second;
+            if (buyIndex != -1)  // 说明机器人已经被分配了购买材料任务
             {   
                 // 如果机器人完成了购买材料任务
-                if (this->context->GetRobot(robotID)->Buy(this->context->GetRobot(robotID)->task_Buy_Sell_.first))
+                if (this->context->GetRobot(robotID)->Buy(buyIndex))
                 {
-                    FactoryType buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
-                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetProductFlag(false);  // 购买完成，解锁工作台的预售状态
-                    this->context->GetRobot(robotID)->task_Buy_Sell_.first = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
+                    FactoryType buyNodeType = this->context->GetFactory(buyIndex)->GetFactoryType();  // 获得机器人购买节点的类型
+                    this->context->GetFactory(buyIndex)->SetProductFlag(false);  // 购买完成，解锁工作台的预售状态
+                    buyIndex = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
                     continue; // 跳帧，等待下一帧检索进入卖材料任务 
                 }
                 // 机器人仍然处于购买材料任务
                 else
                 {
-                    double buyNode_x = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetCoordinate()[0];
-                    double buyNode_y = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetCoordinate()[1];
+                    double buyNode_x = this->context->GetFactory(buyIndex)->GetCoordinate()[0];
+                    double buyNode_y = this->context->GetFactory(buyIndex)->GetCoordinate()[1];
                     this->context->GetRobot(robotID)->curTarget_ = std::make_pair(buyNode_x, buyNode_y); // 设置机器人的目标移动点
                     
-                    FactoryType buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
-                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetProductFlag(true);  // 设置购买节点的购买物品位置已经被预定售卖
+                    FactoryType buyNodeType = this->context->GetFactory(buyIndex)->GetFactoryType();  // 获得机器人购买节点的类型
+                    this->context->GetFactory(buyIndex)->SetProductFlag(true);  // 设置购买节点的购买物品位置已经被预定售卖
 
-                    FactoryType sellNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetFactoryType();  // 获得机器人售卖节点的类型
-                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyNodeType, true);  // 设置售卖节点的收购材料正在送货
+                    FactoryType sellNodeType = this->context->GetFactory(sellIndex)->GetFactoryType();  // 获得机器人售卖节点的类型
+                    this->context->GetFactory(sellIndex)->SetWarehouseFlag(buyNodeType, true);  // 设置售卖节点的收购材料正在送货
                 }
             }
-            else if (this->context->GetRobot(robotID)->task_Buy_Sell_.second != -1)  // 说明机器人已经被分配了卖材料任务
+            else if (sellIndex != -1)  // 说明机器人已经被分配了卖材料任务
             {   
                 // 如果机器人完成了销售材料任务
-                if (this->context->GetRobot(robotID)->Sell(this->context->GetRobot(robotID)->task_Buy_Sell_.second))
+                if (this->context->GetRobot(robotID)->Sell(sellIndex))
                 {
-                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(static_cast<FactoryType>(this->context->GetRobot(robotID)->GetCarryingType()), false);  // 设置售卖节点的收购完成
-                    this->context->GetRobot(robotID)->task_Buy_Sell_.second = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
+                    this->context->GetFactory(sellIndex)->SetWarehouseFlag(static_cast<FactoryType>(this->context->GetRobot(robotID)->GetCarryingType()), false);  // 设置售卖节点的收购完成
+                    sellIndex = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
                     this->context->GetRobot(robotID)->SetFlag(ROBOT_READY);  // 机器人完成购买回归空闲状态
                     continue; // 跳帧，等待下一帧检索和分配任务
                 }
                 // 机器人仍然处于销售材料任务
                 else
                 {
-                    double sellNode_x = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetCoordinate()[0];
-                    double sellNode_y = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetCoordinate()[1];
+                    double sellNode_x = this->context->GetFactory(sellIndex)->GetCoordinate()[0];
+                    double sellNode_y = this->context->GetFactory(sellIndex)->GetCoordinate()[1];
                     this->context->GetRobot(robotID)->curTarget_ = std::make_pair(sellNode_x, sellNode_y); // 设置机器人的目标移动点
                 }
             }

@@ -153,7 +153,9 @@ bool Robot::Sell(int factoryID) const{
                   << " SELL input factoryID NOT accepted, input factoryID: " << factoryID << std::endl;
         return false;
     }
-    if (factoryID != this->nearbyFactoryID_){
+    bool carrying = this->GetCarryingType() > 0 ? true : false;
+    bool readyFlag = this->GetFlag() == RobotFlag::ROBOT_READY ? true : false;
+    if (factoryID != this->nearbyFactoryID_ || carrying){
 //        std::cerr << "Robot NO." << this->robotID_
 //                  << " NOT able to SELL from " << factoryID << ", because NOT around. "
 //                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
