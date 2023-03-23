@@ -53,7 +53,7 @@ bool Context::UpdateAllStatus() {
     int factoryType_cache;
     int remainingFrame_cache;
     int warehouseState_raw_cache;
-    bool productStatus_cache;
+    int productStatus_int_cache;
     float factory_x_input, factory_y_input;
     for (int factory_index = 0; factory_index < this->factoryTotalNum_; ++factory_index) {
 //        std::cerr << "---------------Reading Factory Info---------------" << std::endl;
@@ -82,13 +82,14 @@ bool Context::UpdateAllStatus() {
             return false;
         }
 //        std::cerr << "remainingTime: " << remainingFrame_cache << std::endl;
-        std::cin >> warehouseState_raw_cache >> productStatus_cache;
+        std::cin >> warehouseState_raw_cache >> productStatus_int_cache;
         if (std::cin.bad()) {
             std::cerr << "FACTORY Space Status READ FAILED!!!" << std::endl;
             std::cerr << "warehouseStatus: " << warehouseState_raw_cache << std::endl;
-            std::cerr << "productStatus: " << productStatus_cache << std::endl;
+            std::cerr << "productStatus: " << productStatus_int_cache << std::endl;
             return false;
         }
+        bool productStatus_cache = static_cast<bool>(productStatus_int_cache);
 //        std::cerr << "warehouseStatus: " << warehouseState_raw_cache << std::endl;
 //        std::cerr << "productStatus: " << productStatus_cache << std::endl;
 
