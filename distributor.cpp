@@ -409,7 +409,7 @@ void Distributor::FFNeedUpdate() {
 //                    std::cerr << "2 下游有需求" << std::endl;
                     // 下游有需求，对warehouse_type类的所有上游index循环
                     for (auto edge_to_index : edges_to ) {
-                        std::cerr << edge_from_index << std::endl;
+//                        std::cerr << edge_from_index << std::endl;
                         int up_index = edge_to_index - this->factoryIDShift_;
                         bool product_state = this->context->GetFactory(up_index)->GetProductState();
                         // 上游有产品
