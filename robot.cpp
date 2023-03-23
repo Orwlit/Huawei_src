@@ -36,7 +36,7 @@ void Robot::HighSpeedMove(float destination_x, float destination_y, float dt) {
     float distance = sqrt(pow(distance_x, 2) +pow(distance_y, 2));
 
     float theta = this->GetOrientation() - std::atan2(distance_y, distance_x);
-    if (abs(theta) > M_PI){
+    if (std::abs(theta) > M_PI){
         if (theta > 0){
             theta -= 2 * M_PI;
         }else {
@@ -46,12 +46,12 @@ void Robot::HighSpeedMove(float destination_x, float destination_y, float dt) {
 
     float k = 2.0f; // 可调系数
     if (theta > M_PI / 2){
-        if (distance < SLOW_DOWN_DISTANCE / 2){
-            this->Forward(0);
+        if (distance < SLOW_DOWN_DISTANCE){
+            this->Forward(1);
         }
         this->RotateAngular(theta, dt);
     }else {
-        if (distance > SLOW_DOWN_DISTANCE / 2){
+        if (distance > SLOW_DOWN_DISTANCE){
             this->Forward(6);
         }
         this->RotateAngular(theta, dt);

@@ -89,6 +89,10 @@ int Factory::GetRemainingFrame() const {
 }
 
 std::map<FactoryType, std::pair<bool, bool>> Factory::GetWarehouseState() const {
+//    for (auto it : warehouseState_) {
+//        std::cerr << "Key: " << it.first << " Value1: " << it.second.first << " Value2: " << it.second.second << std::endl;
+//    }
+
     return this->warehouseState_;
 }
 
@@ -109,10 +113,6 @@ const std::set<FactoryType> &Factory::GetWarehouseType() const {
 }
 
 void Factory::SetWarehouseType(const std::set<FactoryType> &warehouseType) {
-    if (this->warehouseType_.size() > 3){
-        std::cerr << "SetWarehouseType ERROR, length > 3" << std::endl;
-        return;
-    }
     this->warehouseType_ = warehouseType;
 }
 

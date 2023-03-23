@@ -37,7 +37,7 @@ bool Distributor::run() {
 //                    if (this->context->GetFactory(factory_index)->GetFactoryClass() == D){
 //                        continue;
 //                    } else {
-//                        this->RFBroadcastUpdate(ready_robot_index, factory_index);
+//                        this->RFHaveProductUpdate(ready_robot_index, factory_index);
 //                    }
 //                }
 //            } else {
@@ -48,19 +48,17 @@ bool Distributor::run() {
 
 
 
-        if (this->context->GetFrameId() < 3){
-            this->context->PrintHistoryMap(this->globalGraph_, "globalGraph_");
-            this->context->PrintHistoryMap(this->historyGraph_, "historyGraph_");
-            std::cerr << std::endl << std::endl;
-        }
-
+//        if (this->context->GetFrameId() < 3){
+//            this->context->PrintHistoryMap(this->globalGraph_, "globalGraph_");
+//            this->context->PrintHistoryMap(this->historyGraph_, "historyGraph_");
+//            std::cerr << std::endl << std::endl;
+//        }
 
         //开始与控制台交互
         std::cout << this->context->GetFrameId() << std::endl;
 
         for (int ready_robot_index = 0; ready_robot_index < this->context->GetRobotTotalNum(); ++ready_robot_index) {
             if (this->context->GetRobot(ready_robot_index)->GetFlag() == ROBOT_READY){
-
 
 
                 double route_value = this->INFINITE_;
@@ -76,11 +74,11 @@ bool Distributor::run() {
 
 
 
-                std::cerr << "route_value: " << route_value << "route_best: " << std::endl;
-                for (auto route : route_best.second) {
-                    std::cerr << route << " ";
-                }
-                std::cerr << std::endl << std::endl;
+//                std::cerr << "route_value: " << route_value << "route_best: " << std::endl;
+//                for (auto route : route_best.second) {
+//                    std::cerr << route << " ";
+//                }
+//                std::cerr << std::endl << std::endl;
 
 
 
@@ -88,8 +86,8 @@ bool Distributor::run() {
                 this->UpdateFromBroadcast();
 
 
-                this->context->PrintHistoryMap(this->globalGraph_, "222globalGraph_");
-                this->context->PrintHistoryMap(this->historyGraph_, "222historyGraph_");
+//                this->context->PrintHistoryMap(this->globalGraph_, "222globalGraph_");
+//                this->context->PrintHistoryMap(this->historyGraph_, "222historyGraph_");
 
 
             } else {
@@ -101,16 +99,16 @@ bool Distributor::run() {
 
 
         // 两两检查是否相撞，共6次
-        for (int i = 0; i < 4; ++i) {
-            for (int j = i + 1; j < 4; ++j) {
-                bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(i), this->context->GetRobot(j), 18);
-                if (aboutToCrash){
-                    this->context->GetRobot(i)->Rotate(M_PI);
-                    this->context->GetRobot(j)->Rotate(M_PI);
-//                    this->context->GetRobot(i)->Forward(0);
-                }
-            }
-        }
+//        for (int i = 0; i < 4; ++i) {
+//            for (int j = i + 1; j < 4; ++j) {
+//                bool aboutToCrash = this->context->AboutToCrash(this->context->GetRobot(i), this->context->GetRobot(j), 18);
+//                if (aboutToCrash){
+//                    this->context->GetRobot(i)->Rotate(M_PI);
+//                    this->context->GetRobot(j)->Rotate(M_PI);
+////                    this->context->GetRobot(i)->Forward(0);
+//                }
+//            }
+//        }
 
 
 
@@ -135,27 +133,31 @@ void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route)
     int robotID = route.second[0];  // 机器人ID
     int thisBuyNode = route.second[1];  // 要去购买东西的节点ID
     int thisSellNode = route.second[2]; // 要去卖东西的节点ID
-    FactoryType sellNodeType = this->context->GetFactory(thisSellNode)->GetFactoryType();
-    FactoryType buyNodeType = this->context->GetFactory(thisBuyNode)->GetFactoryType();
+
+    int thisBuy_index = route.second[1] - this->factoryIDShift_;  //
+    int thisSell_index = route.second[2] - this->factoryIDShift_; //
+
+    FactoryType sellNodeType = this->context->GetFactory(thisSell_index)->GetFactoryType();
+    FactoryType buyNodeType = this->context->GetFactory(thisBuy_index)->GetFactoryType();
    
     // 设置机器人的任务路线
-    this->context->GetRobot(robotID)->task_Buy_Sell_.first = thisBuyNode;
-    this->context->GetRobot(robotID)->task_Buy_Sell_.second = thisSellNode;
+    this->context->GetRobot(robotID)->task_Buy_Sell_.first = thisBuy_index;
+    this->context->GetRobot(robotID)->task_Buy_Sell_.second = thisSell_index;
     // 设置机器人的空闲状态
     this->context->GetRobot(robotID)->SetFlag(ROBOT_BUSY);
 
     // 对于8和9类型的工作台，收购需求一直打开
     // !特殊情况
-    if (this->context->GetFactory(thisSellNode)->GetFactoryClass() == D)
+    if (this->context->GetFactory(thisSell_index)->GetFactoryClass() == D)
     {
         this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(sellNodeType, false); 
     }
     else
     {
-        FactoryType buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
+         //buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
         this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetWarehouseFlag(buyNodeType, true);  // 设置购买节点的购买物品位置已经被预定售卖
     
-        FactoryType sellNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetFactoryType();  // 获得机器人售卖节点的类型
+        // FactoryType sellNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetFactoryType();  // 获得机器人售卖节点的类型
         this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(sellNodeType, true);  // 设置售卖节点的收购材料正在送货
     }
     // 1. 根据机器人到卖家的最短路径route，分配一组买卖任务
@@ -234,9 +236,9 @@ std::pair<double, std::vector<int>> Distributor::BellmanFordRoute(int src, int t
     }
 
     auto V = this->context->GetRobotTotalNum() + this->context->GetFactoryTotalNum();
-    const int INF = this->INFINITE_; //将double转换为int???
+    const double INF = this->INFINITE_; //将double转换为int???
     // 初始化距离数组和路径数组
-    std::vector<int> dist(V, INF);
+    std::vector<double> dist(V, INF);
     std::vector<int> path(V, -1);
     dist[src] = 0;
     // 进行V-1轮松弛操作
@@ -314,52 +316,51 @@ std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector
 }
 
 void Distributor::UpdateFromBroadcast() {
-    // 对所有工厂-工厂按广播更新权值
-    this->FFBroadcastUpdate();
+    // 1. 对所有工厂-工厂按广播更新权值
+    this->FFNeedUpdate();
+    this->RFHaveNeedUpdate();
 
-    // 对所有机器人-工厂按广播更新权值
+    // 2. 机器人-工厂权值更新
+    this->RFHaveProductUpdate();
+
+
+}
+
+// 按是否耽误取货更新机器人-工厂权值
+void Distributor::RFHaveProductUpdate() {
+    const double dt = this->context->GetDt();
+
     for (int robot_index = 0; robot_index < this->context->GetRobotTotalNum(); ++robot_index) {
-        RobotFlag current_robot_flag = this->context->GetRobot(robot_index)->GetFlag();
+        for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
+            const int factory_index_shift = factory_index + this->factoryIDShift_;
 
-        // 对空闲的机器人按照目的地工厂是否有产品更新权值
-        if (current_robot_flag == ROBOT_READY){
-            for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
-                RFBroadcastUpdate(robot_index, factory_index);
+            // product_state 无产品：false，有产品：true
+            bool ok_to_ignore_product_state = false;
+            bool product_state = this->context->GetFactory(factory_index)->GetProductState();
+            int remaining_frame = this->context->GetFactory(factory_index)->GetRemainingFrame();
+
+            if (remaining_frame == -1){ // 没在生产，需要根据产品状态决定
+                ok_to_ignore_product_state = false;
+            } else {
+                double distance_charge_to_factory = this->chargeVelocity_ * dt * remaining_frame;
+                double distance = this->context->DistanceFR(robot_index, factory_index);
+                ok_to_ignore_product_state = distance > distance_charge_to_factory;
             }
-        } else {
-            // 对不空闲的机器人来说，不参与分配任务、不更新地图
-            continue;
+
+
+            if (product_state || ok_to_ignore_product_state){
+                double distance_coe = (this->distanceCoefficient_) * (this->context->DistanceFR(robot_index, factory_index));
+                this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
+            } else {
+                this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
+            }
         }
     }
 }
 
-// 考虑到机器人分为BUSY和READY，这里传入机器人ID和工厂ID，按工厂有无产品更新机器人-工厂权值
-void Distributor::RFBroadcastUpdate(int robot_index, int factory_index) {
-    int factory_index_shift = factory_index + this->factoryIDShift_;
 
-    // product_state 无产品：false，有产品：true
-    bool product_state = this->context->GetFactory(factory_index)->GetProductState();
-    double dt = this->context->GetDt();
-    int remaining_frame = this->context->GetFactory(factory_index)->GetRemainingFrame();
-    double distance_charge_to_factory = this->chargeVelocity_ * dt * remaining_frame;
-    double distance = this->context->DistanceFR(robot_index, factory_index);
-    bool ok_to_ignore_product_state = distance > distance_charge_to_factory;
 
-    if (product_state || ok_to_ignore_product_state){
-//        double robot_x = this->context->GetRobot(robot_index)->GetCoordinate()[0];
-//        double robot_y = this->context->GetRobot(robot_index)->GetCoordinate()[1];
-//        double factory_x = this->context->GetFactory(robot_index)->GetCoordinate()[0];
-//        double factory_y = this->context->GetFactory(robot_index)->GetCoordinate()[1];
-//        double distance = sqrt(pow(factory_x - robot_x, 2) + pow(factory_y - robot_y, 2));
-
-        double distance_coe = (this->distanceCoefficient_) * (this->context->DistanceFR(robot_index, factory_index));
-        this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
-    } else {
-        this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
-    }
-}
-
-void Distributor::FFBroadcastUpdate() {
+void Distributor::FFNeedUpdate() {
     // factory_index: 下游工厂
     for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
         FactoryClass current_class = this->context->GetFactory(factory_index)->GetFactoryClass();
@@ -415,6 +416,35 @@ void Distributor::FFBroadcastUpdate() {
             }
         } else { // 工厂类型不为4567，本身不能当作下游，继续循环
             continue;
+        }
+    }
+}
+
+// 机器人作为工厂上游，按需求对A、D类更新
+void Distributor::RFHaveNeedUpdate() {
+    for (int robot_index = 0; robot_index < this->context->GetRobotTotalNum(); ++robot_index) {
+        for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
+            const int factory_index_shift = factory_index + this->factoryIDShift_;
+            FactoryClass current_class = this->context->GetFactory(factory_index)->GetFactoryClass();
+
+            if (current_class == FactoryClass::A){
+                // warehouse_flag: true: delivering, false: not delivering
+                auto print = this->context->GetFactory(factory_index)->GetWarehouseState();
+                bool warehouse_flag = this->context->GetFactory(factory_index)->GetWarehouseState().at(UNKNOWN).second;
+                if (warehouse_flag){
+                    this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
+                } else {
+                    double distance = this->context->DistanceFR(robot_index, factory_index);
+                    double distance_coe = distance * this->distanceCoefficient_;
+                    this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
+                }
+            }
+            if (current_class == FactoryClass::D){
+//                std::cerr << "FactoryID: " << factory_index << "\tD" << std::endl;
+                this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
+            } else {
+                continue;
+            }
         }
     }
 }

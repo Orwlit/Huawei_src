@@ -107,16 +107,25 @@ bool Context::UpdateAllStatus() {
         }
 
         FactoryType tmp_type = this->GetFactory(factory_index)->GetFactoryType();
-        auto warehouseState_cache = WarehouseStateConversion(tmp_type, warehouseState_raw_cache);
-        if (!(this->allFactories_[factory_index]->SetWarehouseState(warehouseState_cache))) {
-            std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
+        FactoryClass tmp_class = this->GetFactory(factory_index)->GetFactoryClass();
+        if (!(tmp_class == FactoryClass::A)){
+            auto warehouseState_cache = WarehouseStateConversion(tmp_type, warehouseState_raw_cache);
+            if (!(this->allFactories_[factory_index]->SetWarehouseState(warehouseState_cache))) {
+                std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
+            }
         }
 
-        FactoryClass current_factory_class = this->GetFactory(factory_index)->GetFactoryClass();
-        // 认为A类工厂始终有产品
-        if (current_factory_class == FactoryClass::A){
-            this->allFactories_[factory_index]->SetProductStatus(true);
-        } else if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
+
+
+//        FactoryClass current_factory_class = this->GetFactory(factory_index)->GetFactoryClass();
+//        // 认为A类工厂始终有产品
+//        if (current_factory_class == FactoryClass::A){
+//            this->allFactories_[factory_index]->SetProductStatus(true);
+//        } else if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
+//            std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
+//        }
+        // 通过判断机器人来取货是否耽误生产，而不假设123的产能无限
+        if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
         }
     }
@@ -271,6 +280,7 @@ bool Context::Initialize() {
                         warehouseType.insert(UNKNOWN);
                         warehouseState[UNKNOWN].first = false;
                         warehouseState[UNKNOWN].second = false;
+//                        std::cerr << "MATERIAL_1 warehouseState SET DONE" << std::endl;
                         break;
                     case FactoryType::MATERIAL_2:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::A);
@@ -289,7 +299,6 @@ bool Context::Initialize() {
                         this->threeFactoriesIndex_.push_back(factoryID);
                         this->globalFactoryTypeMap_[FACTORY_5][MATERIAL_3].push_back(factoryID);
                         this->globalFactoryTypeMap_[FACTORY_6][MATERIAL_3].push_back(factoryID);
-                        this->allFactories_[factoryID]->SetWarehouseState(UNKNOWN, false);
 
                         warehouseType.insert(UNKNOWN);
                         warehouseState[UNKNOWN].first = false;
@@ -369,7 +378,7 @@ bool Context::Initialize() {
                         warehouseState[FACTORY_7].first = false;
                         warehouseState[FACTORY_7].second = false;
 
-                        this->sellers_.push_back(factoryID);
+                        this->sellers_.push_back(factoryID + this->robotTotalNum_);
                         break;
                     case FactoryType::SELLER_9:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::D);
@@ -389,7 +398,7 @@ bool Context::Initialize() {
                         warehouseState[FACTORY_7].first = false;
                         warehouseState[FACTORY_7].second = false;
 
-                        this->sellers_.push_back(factoryID);
+                        this->sellers_.push_back(factoryID + this->robotTotalNum_);
                         break;
                 }
                 this->allFactories_[factoryID]->SetWarehouseType(warehouseType);
@@ -619,58 +628,58 @@ Context::AboutToCrash(const std::shared_ptr<Robot> &robot1, const std::shared_pt
     return false;
 
 
-    // 将1和2间的距离作为新坐标轴正方向，根据行进方向判断是否相撞
-    float theta_distance = std::atan2(vector_y_between, vector_x_between);
-    float orientation1_new = orientation1 - theta_distance;
-    float orientation2_new = orientation2 - theta_distance;
-//    std::cerr << "theta_distance: " <<  180 * theta_distance / M_PI
-//    << " | orientation1_old: " <<  180 * orientation1 / M_PI
-//    << " | orientation2_old: " <<  180 * orientation2 / M_PI << std::endl;
-    float left_angle = 0.0f;
-    float right_angle = 0.0f;
-
-    if (robot1->GetCoordinate()[0] < robot2->GetCoordinate()[0]){
-        left_angle = orientation1_new;
-        right_angle = orientation2_new;
-//        std::cerr << "LEFT is " << robot1->GetRobotID() << "\tRIGHT is " << robot2->GetRobotID() << std::endl;
-    }
-    else{
-        left_angle = orientation2_new;
-        right_angle = orientation1_new;
-//        std::cerr << "LEFT is " << robot1->GetRobotID() << "\tRIGHT is " << robot2->GetRobotID() << std::endl;
-    }
-//    std::cerr << "LEFT_angle: " << 180 * left_angle / M_PI << ", RIGHT_angle: " << 180 * right_angle / M_PI << std::endl;
-
-    // 根据象限判断是否有相撞的可能。左1象限右2象限 或 左4象限右3象限
-    bool left1 = left_angle >= 0 && left_angle <= M_PI / 2;
-    bool left4 = left_angle >= -M_PI/2 && left_angle <= 0;
-    bool right2 = right_angle >= M_PI / 2 && right_angle <= M_PI;
-    bool right3 = right_angle >= -M_PI && right_angle <= -M_PI/2;
-    bool condition_left1_right2 = (left1) && (right2);
-    bool condition_left4_right3 = (left4) && (right3);
-
-//    std::cerr << "left_angle >= -M_PI/2: " << (left_angle >= -M_PI/2) << "\tleft_angle <= 0: " << (left_angle <= 0) << std::endl;
-
-//    std::cerr << "condition_left1_right2: " << condition_left1_right2 << " | condition_left4_right3: " << condition_left4_right3 << std::endl;
-
-    // 直线相撞判断
-    double min_angle = 2; // 最小角度，单位：度
-    double min_condition = M_PI * min_angle / 180;
-//    std::cerr << "std::abs(left_angle + right_angle): " << 180 * std::abs(left_angle + right_angle - M_PI) / M_PI << std::endl;
-    if ((std::abs(left_angle) + std::abs(right_angle) - M_PI) < min_condition){
-        if ((left1 && right3) || (left4 && right2)){
-            return true;
-            std::cerr << "CRASH WARNING!!!" << std::endl;
-        }
-    }
-
-    // 斜着相撞判断
-    if ((left1 && right2) || (left4 && right3)){
-        std::cerr << "CRASH WARNING!!!" << std::endl;
-        return true;
-    }
-
-    return false;
+//    // 将1和2间的距离作为新坐标轴正方向，根据行进方向判断是否相撞
+//    float theta_distance = std::atan2(vector_y_between, vector_x_between);
+//    float orientation1_new = orientation1 - theta_distance;
+//    float orientation2_new = orientation2 - theta_distance;
+////    std::cerr << "theta_distance: " <<  180 * theta_distance / M_PI
+////    << " | orientation1_old: " <<  180 * orientation1 / M_PI
+////    << " | orientation2_old: " <<  180 * orientation2 / M_PI << std::endl;
+//    float left_angle = 0.0f;
+//    float right_angle = 0.0f;
+//
+//    if (robot1->GetCoordinate()[0] < robot2->GetCoordinate()[0]){
+//        left_angle = orientation1_new;
+//        right_angle = orientation2_new;
+////        std::cerr << "LEFT is " << robot1->GetRobotID() << "\tRIGHT is " << robot2->GetRobotID() << std::endl;
+//    }
+//    else{
+//        left_angle = orientation2_new;
+//        right_angle = orientation1_new;
+////        std::cerr << "LEFT is " << robot1->GetRobotID() << "\tRIGHT is " << robot2->GetRobotID() << std::endl;
+//    }
+////    std::cerr << "LEFT_angle: " << 180 * left_angle / M_PI << ", RIGHT_angle: " << 180 * right_angle / M_PI << std::endl;
+//
+//    // 根据象限判断是否有相撞的可能。左1象限右2象限 或 左4象限右3象限
+//    bool left1 = left_angle >= 0 && left_angle <= M_PI / 2;
+//    bool left4 = left_angle >= -M_PI/2 && left_angle <= 0;
+//    bool right2 = right_angle >= M_PI / 2 && right_angle <= M_PI;
+//    bool right3 = right_angle >= -M_PI && right_angle <= -M_PI/2;
+//    bool condition_left1_right2 = (left1) && (right2);
+//    bool condition_left4_right3 = (left4) && (right3);
+//
+////    std::cerr << "left_angle >= -M_PI/2: " << (left_angle >= -M_PI/2) << "\tleft_angle <= 0: " << (left_angle <= 0) << std::endl;
+//
+////    std::cerr << "condition_left1_right2: " << condition_left1_right2 << " | condition_left4_right3: " << condition_left4_right3 << std::endl;
+//
+//    // 直线相撞判断
+//    double min_angle = 2; // 最小角度，单位：度
+//    double min_condition = M_PI * min_angle / 180;
+////    std::cerr << "std::abs(left_angle + right_angle): " << 180 * std::abs(left_angle + right_angle - M_PI) / M_PI << std::endl;
+//    if ((std::abs(left_angle) + std::abs(right_angle) - M_PI) < min_condition){
+//        if ((left1 && right3) || (left4 && right2)){
+//            return true;
+//            std::cerr << "CRASH WARNING!!!" << std::endl;
+//        }
+//    }
+//
+//    // 斜着相撞判断
+//    if ((left1 && right2) || (left4 && right3)){
+//        std::cerr << "CRASH WARNING!!!" << std::endl;
+//        return true;
+//    }
+//
+//    return false;
 }
 
 float Context::GetDt() const {
@@ -769,7 +778,13 @@ void Context::PrintHistoryMap(const std::vector<std::vector<double>> &map, const
     std::cerr << title << ": " << map.size() << "x" << map[0].size() << std::endl;
 
     // 打印行索引
-    std::cerr << " \t";
+    std::cerr << " \t\t";
+    for (int i = 0; i < this->nodeTotalNum_; ++i) {
+        std::cerr << i << "\t";
+    }
+    std::cerr << std::endl;
+
+    std::cerr << " \t\t";
     for (int i = 0; i < this->robotTotalNum_; ++i) {
         std::cerr << this->GetRobot(i)->GetRobotID() << "\t";
     }
@@ -779,6 +794,7 @@ void Context::PrintHistoryMap(const std::vector<std::vector<double>> &map, const
     std::cerr << std::endl;
 
     for (int i = 0; i < map.size(); ++i) {
+        std::cerr << i << "\t";
         // 打印列索引
         if (i <= 3){
             std::cerr << this->GetRobot(i)->GetRobotID() << "\t";
