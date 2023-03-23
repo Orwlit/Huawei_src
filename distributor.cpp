@@ -303,19 +303,19 @@ std::pair<double, std::vector<int>> Distributor::BellmanFordRoute(int src, int t
 // 根据传入的工厂id和类型，找到所有对应的权值（矩阵块），并返回对应目标工厂的id
 std::vector<int> Distributor::FromIdTypeFindEdgeIndex(int factory_index, FactoryType to_factoryType) const {
 
-    int factory_shift = this->context->GetRobotTotalNum(); // checked
-    FactoryType current_type = this->context->GetFactory(factory_index)->GetFactoryType(); // checked
+    int factory_shift = this->context->GetRobotTotalNum();
+    FactoryType current_type = this->context->GetFactory(factory_index)->GetFactoryType();
 
 //    std::cerr << "NOT PASS" << std::endl;
 //    std::cerr << "factory_index: " << factory_index << " to_factoryType: " << to_factoryType << std::endl;
-    std::vector<int> to_index = this->context->GetGlobalFactoryTypeMap().at(current_type).at(to_factoryType);
+    std::vector<int> nodes_to = this->context->GetGlobalFactoryTypeMap().at(current_type).at(to_factoryType);
 //    std::cerr << "NOT PASS" << std::endl;
 
-    for (int i = 0; i < to_index.size(); ++i) {
-        to_index[i] += factory_shift;
+    for (int i = 0; i < nodes_to.size(); ++i) {
+        nodes_to[i] += factory_shift;
     }
 
-    return to_index;
+    return nodes_to;
 };
 
 std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector<std::vector<double>>& orig) {
@@ -419,6 +419,7 @@ void Distributor::FFNeedUpdate() {
                     }
                 } else {
 //                    std::cerr << "2 下游有需求" << std::endl;
+
                     // 下游有需求，对warehouse_type类的所有上游index循环
                     for (auto node_to : nodes_to ) {
                         int factory_to_index = node_to - this->factoryIDShift_;
