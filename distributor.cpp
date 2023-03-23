@@ -150,15 +150,15 @@ void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route)
     // !特殊情况
     if (this->context->GetFactory(thisSell_index)->GetFactoryClass() == D)
     {
-        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(sellNodeType, false); 
+        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyNodeType, false); 
     }
     else
     {
          //buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
-        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetWarehouseFlag(buyNodeType, true);  // 设置购买节点的购买物品位置已经被预定售卖
+        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetProductFlag(true);  // 设置购买节点生产的产品以及被预售光了
     
         // FactoryType sellNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetFactoryType();  // 获得机器人售卖节点的类型
-        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(sellNodeType, true);  // 设置售卖节点的收购材料正在送货
+        this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyNodeType, true);  // 设置售卖节点的收购材料正在送货
     }
     // 1. 根据机器人到卖家的最短路径route，分配一组买卖任务
     // 2. 分配任务后将相应路径的权值设为正无穷

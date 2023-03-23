@@ -51,3 +51,12 @@
     * 小于：冲过去不会影响拿产品，可以忽略有无产品的状态
     * 大于：冲过去会影响拿产品，不能忽略有无产品的状态
     * 解决办法：1.2.2
+
+
+# 机器人任务分配策略
+根据传入的机器人即将进行购买-销售的路线节点
+1. 锁定购买材料节点生产的产品，即SetProduceFlag(true)
+2. 锁定销售材料节点对应的仓库，即SetWarehouseFlag(buyNodeType, true)
+   
+  * 特殊情况是：对于D类工作台的需求是一直打开的，即SetWarehouseFlag(buyNodeType, false)
+  

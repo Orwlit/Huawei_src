@@ -67,7 +67,16 @@ bool Factory::SetProductStatus(bool state) {
                   << "\tSetProductStatus OUT OF RANGE, should be 0 or 1: " << std::endl;
         return false;
     }
-    this->productState_ = state;
+    this->productState_.first = state;
+    return true;
+}
+bool Factory::SetProductFlag(bool state) {
+    if (state != 0 && state != 1){
+        std::cerr << "FactoryID: " << this->factoryID_
+                  << "\tSetProductStatus OUT OF RANGE, should be 0 or 1: " << std::endl;
+        return false;
+    }
+    this->productState_.second = state;
     return true;
 }
 
@@ -97,7 +106,10 @@ std::map<FactoryType, std::pair<bool, bool>> Factory::GetWarehouseState() const 
 }
 
 bool Factory::GetProductState() const {
-    return productState_;
+    return productState_.first;
+}
+bool Factory::GetProductFlag() const {
+    return productState_.second;
 }
 
 FactoryClass Factory::GetFactoryClass() const {

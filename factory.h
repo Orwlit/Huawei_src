@@ -48,7 +48,7 @@ private:
     //仓库格状态，分别代表仓库格类型、这个格子里有(true)无(false)产品、有(true)无(false)机器人在派送
     std::map<FactoryType, std::pair<bool, bool>> warehouseState_;
     std::set<FactoryType> warehouseType_;
-    bool productState_; //产品格状态
+    std::pair<bool, bool> productState_; //产品格状态
 
     int MAX_REMAINING_FRAME_;
 public:
@@ -64,6 +64,7 @@ public:
     [[nodiscard]] int GetRemainingFrame() const;
     [[nodiscard]] std::map<FactoryType, std::pair<bool, bool>> GetWarehouseState() const;
     [[nodiscard]] bool GetProductState() const;
+    [[nodiscard]] bool Factory::GetProductFlag() const;
     [[nodiscard]] const std::set<FactoryType> &GetWarehouseType() const;
 
     //Setter
@@ -77,6 +78,7 @@ public:
     void SetWarehouseFlag(FactoryType type, bool flag);
     void SetWarehouseType(const std::set<FactoryType> &warehouseType);
     bool SetProductStatus(bool state);
+    bool SetProductFlag(bool state);
 
 };
 
