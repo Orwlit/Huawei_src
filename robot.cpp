@@ -137,7 +137,8 @@ bool Robot::Buy(int factoryID) const{
                   << " BUY input factoryID NOT accepted, input factoryID: " << factoryID << std::endl;
         return false;
     }
-    if (factoryID != this->nearbyFactoryID_){
+    bool carrying = this->GetCarryingType() > 0 ? true : false;
+    if (factoryID != this->nearbyFactoryID_ || !carrying){
 //        std::cerr << "Robot NO." << this->robotID_
 //                  << " NOT able to BUY from " << factoryID << ", because NOT around. "
 //                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
