@@ -177,6 +177,8 @@ void Distributor::CheckAllRobotsState()
                 // 如果机器人完成了购买材料任务
                 if (this->context->GetRobot(robotID)->Buy(this->context->GetRobot(robotID)->task_Buy_Sell_.first))
                 {
+                    FactoryType buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
+                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetProductFlag(false);  // 购买完成，解锁工作台的预售状态
                     this->context->GetRobot(robotID)->task_Buy_Sell_.first = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
                     continue; // 跳帧，等待下一帧检索进入卖材料任务 
                 }
@@ -188,10 +190,10 @@ void Distributor::CheckAllRobotsState()
                     this->context->GetRobot(robotID)->curTarget_ = std::make_pair(buyNode_x, buyNode_y); // 设置机器人的目标移动点
                     
                     FactoryType buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
-                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetWarehouseFlag(buyNodeType, true);  // 设置购买节点的购买物品位置已经被预定售卖
+                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->SetProductFlag(true);  // 设置购买节点的购买物品位置已经被预定售卖
 
                     FactoryType sellNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetFactoryType();  // 获得机器人售卖节点的类型
-                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(sellNodeType, true);  // 设置售卖节点的收购材料正在送货
+                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(buyNodeType, true);  // 设置售卖节点的收购材料正在送货
                 }
             }
             else if (this->context->GetRobot(robotID)->task_Buy_Sell_.second != -1)  // 说明机器人已经被分配了卖材料任务
@@ -199,6 +201,7 @@ void Distributor::CheckAllRobotsState()
                 // 如果机器人完成了销售材料任务
                 if (this->context->GetRobot(robotID)->Sell(this->context->GetRobot(robotID)->task_Buy_Sell_.second))
                 {
+                    this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->SetWarehouseFlag(static_cast<FactoryType>(this->context->GetRobot(robotID)->GetCarryingType()), false);  // 设置售卖节点的收购完成
                     this->context->GetRobot(robotID)->task_Buy_Sell_.second = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
                     this->context->GetRobot(robotID)->SetFlag(ROBOT_READY);  // 机器人完成购买回归空闲状态
                     continue; // 跳帧，等待下一帧检索和分配任务
