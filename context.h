@@ -57,7 +57,7 @@ public:
     //Setter
     void SetPreviousFrameId(int previousFrameId);
 
-    std::vector<int> sellers_;
+    std::vector<int> sellersNode_;
 
 private:
     std::vector<std::shared_ptr<Robot>> allRobots_;

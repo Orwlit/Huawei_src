@@ -137,8 +137,8 @@ bool Robot::Buy(int factoryID) const{
                   << " BUY input factoryID NOT accepted, input factoryID: " << factoryID << std::endl;
         return false;
     }
-    bool carrying = this->GetCarryingType() > 0 ? true : false;
-    if (factoryID != this->nearbyFactoryID_ || !carrying){
+    bool carrying = this->GetCarryingType() > 0;
+    if (factoryID != this->nearbyFactoryID_ ){
 //        std::cerr << "Robot NO." << this->robotID_
 //                  << " NOT able to BUY from " << factoryID << ", because NOT around. "
 //                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
@@ -154,16 +154,15 @@ bool Robot::Sell(int factoryID) const{
                   << " SELL input factoryID NOT accepted, input factoryID: " << factoryID << std::endl;
         return false;
     }
-    bool carrying = this->GetCarryingType() > 0 ? true : false;
-    bool readyFlag = this->GetFlag() == RobotFlag::ROBOT_READY ? true : false;
-    if (factoryID != this->nearbyFactoryID_ || carrying){
+    bool carrying = this->GetCarryingType() > 0;
+    bool isReadyFlag = this->GetFlag() == RobotFlag::ROBOT_READY;
+    if (factoryID != this->nearbyFactoryID_ || !carrying){
 //        std::cerr << "Robot NO." << this->robotID_
 //                  << " NOT able to SELL from " << factoryID << ", because NOT around. "
 //                  << "nearby FactoryID is: " << this->nearbyFactoryID_ << std::endl;
         return false;
     }
     std::cout << "sell" << " " << robotID_ << std::endl;
-
     return true;
 };
 

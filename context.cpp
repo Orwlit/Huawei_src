@@ -103,6 +103,9 @@ bool Context::UpdateAllStatus() {
         }
 
         //刷新其他信息
+        if (remainingFrame_cache != -1){
+            this->allFactories_[factory_index]->SetFlag(FactoryFlag::PRODUCING);
+        }
         if (!(this->allFactories_[factory_index]->SetRemainingFrame(remainingFrame_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetRemainingFrame FAILED" << std::endl;
         }
@@ -126,7 +129,6 @@ bool Context::UpdateAllStatus() {
 //            std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
 //        }
         // 通过判断机器人来取货是否耽误生产，而不假设123的产能无限
-        //TODO: 更换bool类型为pair<bool, bool>
         if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
         }
@@ -380,7 +382,7 @@ bool Context::Initialize() {
                         warehouseState[FACTORY_7].first = false;
                         warehouseState[FACTORY_7].second = false;
 
-                        this->sellers_.push_back(factoryID + this->robotTotalNum_);
+                        this->sellersNode_.push_back(factoryID + this->robotTotalNum_);
                         break;
                     case FactoryType::SELLER_9:
                         this->allFactories_[factoryID]->SetFactoryClass(FactoryClass::D);
@@ -400,7 +402,7 @@ bool Context::Initialize() {
                         warehouseState[FACTORY_7].first = false;
                         warehouseState[FACTORY_7].second = false;
 
-                        this->sellers_.push_back(factoryID + this->robotTotalNum_);
+                        this->sellersNode_.push_back(factoryID + this->robotTotalNum_);
                         break;
                 }
                 this->allFactories_[factoryID]->SetWarehouseType(warehouseType);
