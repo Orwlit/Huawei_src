@@ -331,26 +331,36 @@ void Distributor::RFHaveProductUpdate() {
     for (int robot_index = 0; robot_index < this->context->GetRobotTotalNum(); ++robot_index) {
         for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
             const int factory_index_shift = factory_index + this->factoryIDShift_;
-
-            // product_state 无产品：false，有产品：true
-            bool ok_to_ignore_product_state = false;
-            bool product_state = this->context->GetFactory(factory_index)->GetProductState();
-            int remaining_frame = this->context->GetFactory(factory_index)->GetRemainingFrame();
-
-            if (remaining_frame == -1){ // 没在生产，需要根据产品状态决定
-                ok_to_ignore_product_state = false;
-            } else {
-                double distance_charge_to_factory = this->chargeVelocity_ * dt * remaining_frame;
-                double distance = this->context->DistanceFR(robot_index, factory_index);
-                ok_to_ignore_product_state = distance > distance_charge_to_factory;
-            }
+            double distance = this->context->DistanceFR(robot_index, factory_index);
+            double distance_coe = this->distanceCoefficient_ * distance;
 
 
-            if (product_state || ok_to_ignore_product_state){
-                double distance_coe = (this->distanceCoefficient_) * (this->context->DistanceFR(robot_index, factory_index));
+            //TODO: 需要添加判断有没有人配送的逻辑
+
+            // 1层，有无派送？
+            bool have_delivery = this->context->GetFactory(factory_index)->GetProductState().second;
+            if (have_delivery){
                 this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
             } else {
-                this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
+                // product_state 无产品：false，有产品：true
+                bool ok_to_ignore_product_state = false;
+                bool product_state = this->context->GetFactory(factory_index)->GetProductState();
+                int remaining_frame = this->context->GetFactory(factory_index)->GetRemainingFrame();
+
+                if (remaining_frame == -1){ // 没在生产，需要根据产品状态决定
+                    ok_to_ignore_product_state = false;
+                } else {
+                    double distance_charge_to_factory = this->chargeVelocity_ * dt * remaining_frame;
+                    ok_to_ignore_product_state = distance > distance_charge_to_factory;
+                }
+
+
+                // 2层，耽不耽误拿产品？？
+                if (product_state || ok_to_ignore_product_state){
+                    this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
+                } else {
+                    this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
+                }
             }
         }
     }
