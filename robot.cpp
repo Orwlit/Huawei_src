@@ -178,7 +178,7 @@ bool Robot::SetNearbyFactoryID(int nearbyFactory) {
 
 bool Robot::SetCarryingType(int carryingType) {
     this->carryingType_ = carryingType;
-    //
+
 //    if (carryingType == 0){
 //        this->flag_ = ROBOT_READY;
 //    }

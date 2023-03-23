@@ -39,7 +39,7 @@ public:
 
     // 分配逻辑
     bool GraphOptimization(); // 全局图优化，利用A层到D层最短距离，结合机器人距离派发任务。(A层：123；B层：456；C层：7；D层：89)
-    void UpdateFromBroadcast(); // 通过每帧信息更新权值
+    void UpdateNeedFrom(); // 通过每帧信息更新权值
     void UpdateFromPlanning(); // 根据机器人寻路更新权值
     void UpdateFromTask(); // 根据分配任务情况更新权值
 
@@ -67,10 +67,10 @@ private:
     int nodeTotalNum_;
     int factoryIDShift_;
 
-    const double INFINITE_ = 99999.0; // 表示无穷大
-    const double MAX_ENCOURAGE_ = 0.0; // 表示最大激励
-    const double ZERO_ = 0.1; // 表示0?
-    const double distanceCoefficient_ = 10;
+    const double INFINITE_ = 9999999999999999999999999999999.0; // 表示无穷大
+    const double MAX_ENCOURAGE_ = 1.0; // 表示最大激励
+    const double ZERO_ = 100.0; // 表示0?
+    const double distanceCoefficient_ = 10000;
     const double chargeVelocity_ = 6.0; // 机器人预想冲刺速度，用于RFBroadcastUpdate中调整机器人-工厂是否忽略产品状态
 
 };

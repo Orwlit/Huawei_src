@@ -112,7 +112,9 @@ bool Context::UpdateAllStatus() {
 
         FactoryType tmp_type = this->GetFactory(factory_index)->GetFactoryType();
         FactoryClass tmp_class = this->GetFactory(factory_index)->GetFactoryClass();
-        if (!(tmp_class == FactoryClass::A)){
+//        if (!(tmp_class == FactoryClass::A))
+//        if (!(tmp_class == FactoryClass::A))
+            {
             auto warehouseState_cache = WarehouseStateConversion(tmp_type, warehouseState_raw_cache);
             if (!(this->allFactories_[factory_index]->SetWarehouseState(warehouseState_cache))) {
                 std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
@@ -737,6 +739,9 @@ std::map<FactoryType, std::pair<bool, bool>> Context::WarehouseStateConversion(F
         {
             res_[static_cast<FactoryType>(pos)].first = true;
         }
+
+//        std::cerr << "res_.at(MATERIAL_2).first: " << res_[MATERIAL_2].first << " res_[MATERIAL_3].first: " << res_[MATERIAL_3].first<< std::endl;
+
     }
     else if (type == FACTORY_7)
     {
@@ -748,6 +753,8 @@ std::map<FactoryType, std::pair<bool, bool>> Context::WarehouseStateConversion(F
             res_[static_cast<FactoryType>(pos)].first = true;
         }
     }
+
+//    std::cerr << "res_.size()" << res_.size() << std::endl;
     return res_;
 }
 

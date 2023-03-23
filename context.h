@@ -99,7 +99,7 @@ private:
     const int factoryIDShift_ = robotTotalNum_; // 因为前四个为机器人，所以所有工厂序号做相应的偏移
     const std::string OK_ = "OK";
     const double MINIMUM_EQUAL_VALUE_ = 0.001;
-    const double INFINITE_ = 99999.0; // 表示无穷大
+    const double INFINITE_ = 9999999999999999999999999999999.0; // 表示无穷大
 
 };
 
