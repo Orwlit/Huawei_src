@@ -341,7 +341,7 @@ void Distributor::RFHaveProductUpdate() {
             //TODO: 需要添加判断有没有人配送的逻辑
 
             // 1层，有无派送？
-            bool have_delivery = this->context->GetFactory(factory_index)->GetProductState().second;
+            bool have_delivery = this->context->GetFactory(factory_index)->GetProductFlag();
             if (have_delivery){
                 this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
             } else {
