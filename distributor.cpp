@@ -57,20 +57,23 @@ bool Distributor::run() {
         //开始与控制台交互
         std::cout << this->context->GetFrameId() << std::endl;
 
-        for (int ready_robot_index = 0; ready_robot_index < this->context->GetRobotTotalNum(); ++ready_robot_index) {
-            if (this->context->GetRobot(ready_robot_index)->GetFlag() == ROBOT_READY){
+
+        if (this->context->GetFrameId() == 51){
+
+            for (int ready_robot_index = 0; ready_robot_index < this->context->GetRobotTotalNum(); ++ready_robot_index) {
+                if (this->context->GetRobot(ready_robot_index)->GetFlag() == ROBOT_READY){
 
 
-                double route_value = this->INFINITE_;
-                std::pair<double, std::vector<int>> route_best;
-                for (int seller_index : this->context->sellersNode_) {
-                    int seller_shift_index = seller_index + this->factoryIDShift_;
-                    auto route_tmp = this->BellmanFordRoute(ready_robot_index, seller_index);
-                    if (route_value > route_tmp.first){
-                        route_value = route_tmp.first;
-                        route_best = route_tmp;
+                    double route_value = this->INFINITE_;
+                    std::pair<double, std::vector<int>> route_best;
+                    for (int seller_index : this->context->sellersNode_) {
+                        int seller_shift_index = seller_index + this->factoryIDShift_;
+                        auto route_tmp = this->BellmanFordRoute(ready_robot_index, seller_index);
+                        if (route_value > route_tmp.first){
+                            route_value = route_tmp.first;
+                            route_best = route_tmp;
+                        }
                     }
-                }
 
 
 
@@ -82,18 +85,22 @@ bool Distributor::run() {
 
 
 
-                this->DistributeTask(route_best);
-                this->UpdateFromBroadcast();
+                    this->DistributeTask(route_best);
+                    this->UpdateFromBroadcast();
 
 
 //                this->context->PrintHistoryMap(this->globalGraph_, "222globalGraph_");
 //                this->context->PrintHistoryMap(this->historyGraph_, "222historyGraph_");
 
 
-            } else {
-                continue;
+                } else {
+                    continue;
+                }
             }
+
         }
+
+
 
         this->CheckAllRobotsState();
 
@@ -342,9 +349,6 @@ void Distributor::RFHaveProductUpdate() {
             double distance = this->context->DistanceFR(robot_index, factory_index);
             double distance_coe = this->distanceCoefficient_ * distance;
 
-
-            //TODO: 需要添加判断有没有人配送的逻辑
-
             // 1层，有无派送？
             bool have_delivery = this->context->GetFactory(factory_index)->GetProductFlag();
             if (have_delivery){
@@ -363,12 +367,20 @@ void Distributor::RFHaveProductUpdate() {
                 }
 
 
+//                // 2层，耽不耽误拿产品？？
+//                if (product_state || ok_to_ignore_product_state){
+//                    this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
+//                } else {
+//                    this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
+//                }
+
                 // 2层，耽不耽误拿产品？？
-                if (product_state || ok_to_ignore_product_state){
+                if (product_state){
                     this->PreserveAndUpdateInfo(robot_index, factory_index_shift, distance_coe);
                 } else {
                     this->PreserveAndUpdateInfo(robot_index, factory_index_shift, this->INFINITE_);
                 }
+
             }
         }
     }
@@ -378,23 +390,23 @@ void Distributor::RFHaveProductUpdate() {
 
 void Distributor::FFNeedUpdate() {
     // factory_index: 下游工厂
-    for (int factory_index = 0; factory_index < this->context->GetFactoryTotalNum(); ++factory_index) {
-        FactoryClass current_class = this->context->GetFactory(factory_index)->GetFactoryClass();
-        int edge_from_index = factory_index + this->factoryIDShift_;
+    for (int factory_from_index = 0; factory_from_index < this->context->GetFactoryTotalNum(); ++factory_from_index) {
+        FactoryClass current_class = this->context->GetFactory(factory_from_index)->GetFactoryClass();
+        int node_from = factory_from_index + this->factoryIDShift_;
 
         // 对4567类型工厂的仓库状态循环
         if (current_class == FactoryClass::B || current_class == FactoryClass::C){
-            auto warehouse_state = this->context->GetFactory(factory_index)->GetWarehouseState();
+            auto warehouse_state = this->context->GetFactory(factory_from_index)->GetWarehouseState();
             // 对该类型的每个仓库格类型循环
-            for (auto warehouse_type : this->context->GetFactory(factory_index)->GetWarehouseType()) {
+            for (auto warehouse_type : this->context->GetFactory(factory_from_index)->GetWarehouseType()) {
 //                std::cerr << "1 是BC CLASS" << std::endl;
-//                std::cerr << "工厂id: " << factory_index << " 现在仓库类型为: " << warehouse_type << std::endl;
+//                std::cerr << "工厂id: " << factory_from_index << " 现在仓库类型为: " << warehouse_type << std::endl;
 
 
-                std::vector<int> edges_to = this->FromIdTypeFindEdgeIndex(factory_index, warehouse_type);
+                std::vector<int> nodes_to = this->FromIdTypeFindEdgeIndex(factory_from_index, warehouse_type);
 //                std::cerr << "找到的edges_to: ";
-//                for (auto item : edges_to) {
-//                    std::cerr << factory_index << " ";
+//                for (auto item : nodes_to) {
+//                    std::cerr << factory_from_index << " ";
 //                }
 //                std::cerr << std::endl;
 
@@ -402,29 +414,33 @@ void Distributor::FFNeedUpdate() {
                 bool have_need = (!(warehouse_state[warehouse_type].first)) && (!(warehouse_state[warehouse_type].second));
                 if (!have_need){
 //                    std::cerr << "2 下游无需求" << std::endl;
-                    for (auto edge_to_index : edges_to) {
-                        this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->MAX_ENCOURAGE_);
+                    for (auto node_to : nodes_to) {
+                        this->PreserveAndUpdateInfo(node_from, node_to, this->INFINITE_);
                     }
                 } else {
 //                    std::cerr << "2 下游有需求" << std::endl;
                     // 下游有需求，对warehouse_type类的所有上游index循环
-                    for (auto edge_to_index : edges_to ) {
-//                        std::cerr << edge_from_index << std::endl;
-                        int up_index = edge_to_index - this->factoryIDShift_;
-                        bool product_state = this->context->GetFactory(up_index)->GetProductState();
+                    for (auto node_to : nodes_to ) {
+                        int factory_to_index = node_to - this->factoryIDShift_;
+                        double distance = this->context->DistanceFF(factory_from_index, factory_to_index);
+                        double distance_zero = distance * this->ZERO_;
+                        double distance_max_encourage = distance * this->MAX_ENCOURAGE_;
+
+//                        std::cerr << node_from << std::endl;
+                        bool product_state = this->context->GetFactory(factory_to_index)->GetProductState();
                         // 上游有产品
                         if (product_state){
 //                            std::cerr << "3 上游有产品" << std::endl;
-                            this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->MAX_ENCOURAGE_);
+                            this->PreserveAndUpdateInfo(node_from, node_to, distance_max_encourage);
                         } else {
 //                            std::cerr << "3 上游无产品" << std::endl;
-                            // 上游没有产品，根据是否在生产决定
-                            FactoryFlag up_flag = this->context->GetFactory(up_index)->GetFactoryFlag();
+
                             // 在生产
-                            if (up_flag == FactoryFlag::PRODUCING){
-                                this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->INFINITE_); //TODO: BUG
+                            bool producing = this->context->GetFactory(factory_to_index)->GetRemainingFrame() > -1;
+                            if (producing){
+                                this->PreserveAndUpdateInfo(node_from, node_to, this->INFINITE_);
                             } else {
-                                this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->ZERO_);
+                                this->PreserveAndUpdateInfo(node_from, node_to, distance_zero);
                             }
                         }
                     }
