@@ -322,8 +322,6 @@ void Distributor::UpdateFromBroadcast() {
 
     // 2. 机器人-工厂权值更新
     this->RFHaveProductUpdate();
-
-
 }
 
 // 按是否耽误取货更新机器人-工厂权值
@@ -381,13 +379,13 @@ void Distributor::FFNeedUpdate() {
 //                    std::cerr << factory_index << " ";
 //                }
 //                std::cerr << std::endl;
-                // 仓库状态为true，代表有货物，即为没有需求，正无穷
-                bool no_need = !(warehouse_state[warehouse_type].first) && !(warehouse_state[warehouse_type].second);
 
-                if (no_need){
+                // 有需求的定义：仓库里没货，且没人给送货
+                bool have_need = (!(warehouse_state[warehouse_type].first)) && (!(warehouse_state[warehouse_type].second));
+                if (!have_need){
 //                    std::cerr << "2 下游无需求" << std::endl;
                     for (auto edge_to_index : edges_to) {
-                        this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->MAX_ENCOURAGE_); //TODO: BUG
+                        this->PreserveAndUpdateInfo(edge_from_index, edge_to_index, this->MAX_ENCOURAGE_);
                     }
                 } else {
 //                    std::cerr << "2 下游有需求" << std::endl;

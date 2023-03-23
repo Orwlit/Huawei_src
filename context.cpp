@@ -125,6 +125,7 @@ bool Context::UpdateAllStatus() {
 //            std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
 //        }
         // 通过判断机器人来取货是否耽误生产，而不假设123的产能无限
+        //TODO: 更换bool类型为pair<bool, bool>
         if (!(this->allFactories_[factory_index]->SetProductStatus(productStatus_cache))) {
             std::cerr << "FactoryID: " << factory_index << " SetProductStatus FAILED!!!" << std::endl;
         }
