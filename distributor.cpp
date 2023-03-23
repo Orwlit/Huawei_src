@@ -177,7 +177,7 @@ void Distributor::CheckAllRobotsState()
             if (buyIndex != -1)  // 说明机器人已经被分配了购买材料任务
             {   
                 // 如果机器人完成了购买材料任务
-                if (this->context->GetRobot(robotID)->Buy(buyIndex))
+                if (this->context->GetRobot(robotID)->Buy(buyIndex) && this->context->GetFactory(buyIndex)->GetProductState() == false)
                 {
                     FactoryType buyNodeType = this->context->GetFactory(buyIndex)->GetFactoryType();  // 获得机器人购买节点的类型
                     this->context->GetFactory(buyIndex)->SetProductFlag(false);  // 购买完成，解锁工作台的预售状态
@@ -201,7 +201,7 @@ void Distributor::CheckAllRobotsState()
             else if (sellIndex != -1)  // 说明机器人已经被分配了卖材料任务
             {   
                 // 如果机器人完成了销售材料任务
-                if (this->context->GetRobot(robotID)->Sell(sellIndex))
+                if (this->context->GetRobot(robotID)->Sell(sellIndex) && this->context->GetFactory(sellIndex)->GetProductState() == true)
                 {
                     this->context->GetFactory(sellIndex)->SetWarehouseFlag(static_cast<FactoryType>(this->context->GetRobot(robotID)->GetCarryingType()), false);  // 设置售卖节点的收购完成
                     sellIndex = -1; // 如果机器人购买完成则设置购买节点位-1，标记完成了材料购买
