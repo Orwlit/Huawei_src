@@ -97,7 +97,7 @@ int Factory::GetRemainingFrame() const {
     return remainingFrame_;
 }
 
-std::map<FactoryType, std::pair<bool, bool>> Factory::GetWarehouseState() const {
+const std::map<FactoryType, std::pair<bool, bool>> &Factory::GetWarehouseState() const {
 //    for (auto it : warehouseState_) {
 //        std::cerr << "Key: " << it.first << " Value1: " << it.second.first << " Value2: " << it.second.second << std::endl;
 //    }

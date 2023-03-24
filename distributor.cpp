@@ -29,7 +29,7 @@ bool Distributor::run() {
         }
 
         // 根据广播更新地图
-        this->UpdateNeedFrom();
+        this->UpdateNeed();
 
 //        for (int ready_robot_index = 0; ready_robot_index < this->context->GetRobotTotalNum(); ++ready_robot_index) {
 //            if (this->context->GetRobot(ready_robot_index)->GetFlag() == ROBOT_READY){
@@ -93,7 +93,7 @@ bool Distributor::run() {
                     this->DistributeTask(route_best);
 //                    std::cerr << "PASS" << std::endl;
 
-                    this->UpdateNeedFrom();
+                    this->UpdateNeed();
 
 
 
@@ -212,9 +212,9 @@ void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route)
 
     if (thisSell_index == 12){
         std::cerr << "RobotID: " << robotID << " Buy type: " << buyIndexType << " Sell type: " << sellIndexType << std::endl;
-        std::cerr << "Buy product state: " << this->context->GetFactory(thisBuy_index)->GetProductState() << "Buy product flag: " << this->context->GetFactory(thisBuy_index)->GetProductFlag() <<std::endl;
+        std::cerr << "Buy product state: " << this->context->GetFactory(thisBuy_index)->GetProductState() << " Buy product flag: " << this->context->GetFactory(thisBuy_index)->GetProductFlag() <<std::endl;
         for (auto item : this->context->GetFactory(thisSell_index)->GetWarehouseState()) {
-            std::cerr << "Sell Warehouse Type: " << item.first << "State: " << item.second.first << " Flag: " << item.second.first <<std::endl;
+            std::cerr << "Sell Warehouse Type: " << item.first << " State: " << item.second.first << " Flag: " << item.second.first <<std::endl;
         }
         std::cerr << "------------------------------------" << std::endl;
     }
@@ -384,10 +384,14 @@ std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector
     a.reserve(0);
 }
 
-void Distributor::UpdateNeedFrom() {
+void Distributor::UpdateNeed() {
     // 1. 对所有工厂-工厂按广播更新权值
+
     this->FFNeedUpdate();
+
+//    std::cerr << "NOT PASS" << std::endl;
     this->RFHaveNeedUpdate();
+//    std::cerr << "PASS" << std::endl;
 
     // 2. 机器人-工厂权值更新
     this->RFHaveProductUpdate();
@@ -519,6 +523,8 @@ void Distributor::RFHaveNeedUpdate() {
                 auto print = this->context->GetFactory(factory_index)->GetWarehouseState();
 
 //                std::cerr << "NOT PASS" << std::endl;
+//                std::cerr << "factory_index: " << factory_index << std::endl;
+//                std::cerr << this->context->GetFactory(factory_index)->GetWarehouseState().size() << std::endl;
                 bool warehouse_flag = this->context->GetFactory(factory_index)->GetWarehouseState().at(UNKNOWN).second;
 //                std::cerr << "PASS" << std::endl;
 

@@ -39,7 +39,7 @@ public:
 
     // 分配逻辑
     bool GraphOptimization(); // 全局图优化，利用A层到D层最短距离，结合机器人距离派发任务。(A层：123；B层：456；C层：7；D层：89)
-    void UpdateNeedFrom(); // 通过每帧信息更新权值
+    void UpdateNeed(); // 通过每帧信息更新权值
     void UpdateFromPlanning(); // 根据机器人寻路更新权值
     void UpdateFromTask(); // 根据分配任务情况更新权值
 

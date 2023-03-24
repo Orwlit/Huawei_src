@@ -25,7 +25,7 @@ public:
     void FactoriesClassification();
 
     // 基本工具
-    std::map<FactoryType, std::pair<bool, bool>> WarehouseStateConversion(FactoryType type, int rawInfo);
+    bool WarehouseStateUpdate(int factory_index, int rawInfo);
     void PrintHistoryMap(const std::vector<std::vector<double>> &map, const std::string &title);
     static void PrintMapMapVector(const std::map<FactoryType, std::map<FactoryType, std::vector<int>>> &map, const std::string &title) ;
 

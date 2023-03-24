@@ -115,8 +115,8 @@ bool Context::UpdateAllStatus() {
 //        if (!(tmp_class == FactoryClass::A))
 //        if (!(tmp_class == FactoryClass::A))
             {
-            auto warehouseState_cache = WarehouseStateConversion(tmp_type, warehouseState_raw_cache);
-            if (!(this->allFactories_[factory_index]->SetWarehouseState(warehouseState_cache))) {
+            bool warehouse_state_update_success = WarehouseStateUpdate(factory_index, warehouseState_raw_cache);
+            if (!warehouse_state_update_success) {
                 std::cerr << "FactoryID: " << factory_index << " SetWarehouseState FAILED!!!" << std::endl;
             }
         }
@@ -710,52 +710,48 @@ inline std::vector<int> get_the_one_position(int num)
     return positions;
 }
 
-std::map<FactoryType, std::pair<bool, bool>> Context::WarehouseStateConversion(FactoryType type, int rawInfo){
+bool Context::WarehouseStateUpdate(int factory_index, int rawInfo){
     std::vector<int> onePositions = get_the_one_position(rawInfo);
-    std::map<FactoryType, std::pair<bool, bool>> res_;
-    if (type == FACTORY_4) 
-    {
-        res_[MATERIAL_1].first = false;
-        res_[MATERIAL_2].first = false;
-        for(auto pos : onePositions)
-        {
-            res_[static_cast<FactoryType>(pos)].first = true;
-        }
-    }
-    else if (type == FACTORY_5) 
-    {
-        res_[MATERIAL_1].first = false;
-        res_[MATERIAL_3].first = false;
-        for(auto pos : onePositions)
-        {
-            res_[static_cast<FactoryType>(pos)].first = true;
-        }
-    }
-    else if (type == FACTORY_6) 
-    {
-        res_[MATERIAL_2].first = false;
-        res_[MATERIAL_3].first = false;
-        for(auto pos : onePositions)
-        {
-            res_[static_cast<FactoryType>(pos)].first = true;
-        }
+//    std::map<FactoryType, std::pair<bool, bool>> res_;
+//    FactoryType current_type =  this->GetFactory(factory_index)->GetFactoryType();
+//    FactoryClass current_class = this->GetFactory(factory_index)->GetFactoryClass();
 
-//        std::cerr << "res_.at(MATERIAL_2).first: " << res_[MATERIAL_2].first << " res_[MATERIAL_3].first: " << res_[MATERIAL_3].first<< std::endl;
-
-    }
-    else if (type == FACTORY_7)
-    {
-        res_[FACTORY_4].first = false;
-        res_[FACTORY_5].first = false;
-        res_[FACTORY_6].first = false;
-        for(auto pos : onePositions)
-        {
-            res_[static_cast<FactoryType>(pos)].first = true;
-        }
+    // 先将全部仓库状态置为false，后根据是否真的有产品置为true
+    for (auto warehouse_type : this->GetFactory(factory_index)->GetWarehouseType()) {
+        this->GetFactory(factory_index)->SetWarehouseState(warehouse_type, false);
     }
 
-//    std::cerr << "res_.size()" << res_.size() << std::endl;
-    return res_;
+    // 根据是否真的有产品置为true
+    for(auto pos : onePositions) {
+        auto warehouse_type =  static_cast<FactoryType>(pos);
+        this->GetFactory(factory_index)->SetWarehouseState(warehouse_type, true);
+    }
+
+    return true;
+
+//    // 只有BC类更新仓库格状态
+//    if (current_class == FactoryClass::A || current_class == FactoryClass::D){
+//        // 有必要让AD的仓库状态一直为false吗？反正也不可能更新
+//        for (auto warehouse_type : this->GetFactory(factory_index)->GetWarehouseType()) {
+//            this->GetFactory(factory_index)->SetWarehouseState(warehouse_type, false);
+//        }
+//        return true;
+//    } else {
+//        // 先将全部仓库状态置为false，后根据是否真的有产品置为true
+//        for (auto warehouse_type : this->GetFactory(factory_index)->GetWarehouseType()) {
+//            this->GetFactory(factory_index)->SetWarehouseState(warehouse_type, false);
+//        }
+//
+//        // 根据是否真的有产品置为true
+//        for(auto pos : onePositions)
+//        {
+//            auto warehouse_type =  static_cast<FactoryType>(pos);
+//            this->GetFactory(factory_index)->SetWarehouseState(warehouse_type, true);
+//        }
+//    }
+//
+//    std::cerr << "something WRONG in Context::WarehouseStateUpdate, returning false" << std::endl;
+//    return false;
 }
 
 

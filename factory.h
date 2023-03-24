@@ -62,7 +62,7 @@ public:
     [[nodiscard]] const float* GetCoordinate() const;
     [[nodiscard]] int GetFactoryId() const;
     [[nodiscard]] int GetRemainingFrame() const;
-    [[nodiscard]] std::map<FactoryType, std::pair<bool, bool>> GetWarehouseState() const;
+    [[nodiscard]] const std::map<FactoryType, std::pair<bool, bool>> &GetWarehouseState() const;
     [[nodiscard]] bool GetProductState() const;
     [[nodiscard]] bool GetProductFlag() const;
     [[nodiscard]] const std::set<FactoryType> &GetWarehouseType() const;
