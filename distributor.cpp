@@ -85,13 +85,13 @@ bool Distributor::run() {
 //                std::cerr << std::endl << std::endl;
 
 
-//                    std::cerr << "NOT PASS" << std::endl;
 
 //                    this->context->PrintHistoryMap(this->globalGraph_, "222globalGraph_");
 //                    this->context->PrintHistoryMap(this->historyGraph_, "222historyGraph_");
 
+                    std::cerr << "NOT PASS" << std::endl;
                     this->DistributeTask(route_best);
-//                    std::cerr << "PASS" << std::endl;
+                    std::cerr << "PASS" << std::endl;
 
                     this->UpdateNeed();
 
@@ -144,6 +144,8 @@ bool Distributor::GraphOptimization() {
 // 分配
 void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route) 
 {
+
+
     int robotID = route.second[0];  // 机器人ID
     int thisBuyNode = route.second[1];  // 要去购买东西的节点ID
     int thisSellNode = route.second[2]; // 要去卖东西的节点ID
@@ -196,28 +198,34 @@ void Distributor::DistributeTask(std::pair<double, std::vector<int>>& route)
     else
     {
 
-//        std::cerr << "4 PASS" << std::endl;
+        std::cerr << "4 PASS" << std::endl;
 
 
         //buyNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.first)->GetFactoryType();  // 获得机器人购买节点的类型
         int buy_index = this->context->GetRobot(robotID)->task_Buy_Sell_.first;
         int sell_index = this->context->GetRobot(robotID)->task_Buy_Sell_.second;
 
+        std::cerr << "5 PASS" << std::endl;
+
+
         // FactoryType sellNodeType = this->context->GetFactory(this->context->GetRobot(robotID)->task_Buy_Sell_.second)->GetFactoryType();  // 获得机器人售卖节点的类型
         this->context->GetFactory(buy_index)->SetProductFlag(true);  // 设置购买节点生产的产品以及被预售光了
         this->context->GetFactory(sell_index)->SetWarehouseFlag(buyIndexType, true);  // 设置售卖节点的收购材料正在送货
+
+        std::cerr << "6 PASS" << std::endl;
+
     }
     // 1. 根据机器人到卖家的最短路径route，分配一组买卖任务
     // 2. 分配任务后将相应路径的权值设为正无穷
 
-    if (thisSell_index == 12){
-        std::cerr << "RobotID: " << robotID << " Buy type: " << buyIndexType << " Sell type: " << sellIndexType << std::endl;
-        std::cerr << "Buy product state: " << this->context->GetFactory(thisBuy_index)->GetProductState() << " Buy product flag: " << this->context->GetFactory(thisBuy_index)->GetProductFlag() <<std::endl;
-        for (auto item : this->context->GetFactory(thisSell_index)->GetWarehouseState()) {
-            std::cerr << "Sell Warehouse Type: " << item.first << " State: " << item.second.first << " Flag: " << item.second.first <<std::endl;
-        }
-        std::cerr << "------------------------------------" << std::endl;
-    }
+//    if (thisSell_index == 12){
+//        std::cerr << "RobotID: " << robotID << " Buy type: " << buyIndexType << " Sell type: " << sellIndexType << std::endl;
+//        std::cerr << "Buy product state: " << this->context->GetFactory(thisBuy_index)->GetProductState() << " Buy product flag: " << this->context->GetFactory(thisBuy_index)->GetProductFlag() <<std::endl;
+//        for (auto item : this->context->GetFactory(thisSell_index)->GetWarehouseState()) {
+//            std::cerr << "Sell Warehouse Type: " << item.first << " State: " << item.second.first << " Flag: " << item.second.first <<std::endl;
+//        }
+//        std::cerr << "------------------------------------" << std::endl;
+//    }
 
 }
 
@@ -386,15 +394,18 @@ std::vector<std::vector<double>> Distributor::DeepCopy2DVector(const std::vector
 
 void Distributor::UpdateNeed() {
     // 1. 对所有工厂-工厂按广播更新权值
-
+//    std::cerr << "1 NOT PASS" << std::endl;
     this->FFNeedUpdate();
+//    std::cerr << "1 PASS" << std::endl;
 
-//    std::cerr << "NOT PASS" << std::endl;
+//    std::cerr << "2 NOT PASS" << std::endl;
     this->RFHaveNeedUpdate();
-//    std::cerr << "PASS" << std::endl;
+//    std::cerr << "2 PASS" << std::endl;
 
     // 2. 机器人-工厂权值更新
+//    std::cerr << "3 NOT PASS" << std::endl;
     this->RFHaveProductUpdate();
+//    std::cerr << "3 PASS" << std::endl;
 }
 
 // 按是否耽误取货更新机器人-工厂权值
